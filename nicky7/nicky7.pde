@@ -1,11 +1,3 @@
-import processing.video.*;
-import ddf.minim.*;
-
-Minim minim;
-AudioInput audioIn;
-
-int t = 0;
-
 int rows = 500;
 
 int scrnWidth = 600;
@@ -18,6 +10,7 @@ float cdfSumY = 0;
 
 PFont[] fonts = new PFont[16];
 
+Webcam webcam;
 PImage img;
 int[] imgYPDF;
 int[][] imgPDF;
@@ -26,11 +19,12 @@ int[][] imgCDF;
 
 int[] luminanceHistogram = new int[16];
 
-int audioLevel = 0;
+item[] items = new item[rows];
 
 boolean showInfo = false;
 
-Capture cam;
+AudioIn audioIn;
+int audioLevel = 0;
 
 //---------------------------------------------------------------
 
@@ -280,8 +274,6 @@ class item {
   
 } 
 
-item[] items = new item[rows];
-
 void setup () {  
   size(scrnWidth, scrnHeight);
   if (frame != null) {
@@ -294,28 +286,12 @@ void setup () {
   } 
   textFont(fonts[0]); 
   fill(255, 255, 255, 255);
-  
-  //audio input
-  minim = new Minim(this);  
-  audioIn = minim.getLineIn(Minim.MONO);
-  
-  //webcam
-  String[] cameras = Capture.list();
-  
-  if (cameras.length == 0) {
-    println("There are no cameras available for capture.");
-    exit();
-  } else {
-    //println("Available cameras:");
-    //for (int i = 0; i < cameras.length; i++) {
-    //  println(cameras[i]);
-    //}
-    
-    // The camera can be initialized directly using an 
-    // element from the array returned by list():
-    cam = new Capture(this, cameras[0]);
-    cam.start();     
-  } 
+ 
+  //println(this);
+  audioIn = new AudioIn(this);
+  webcam = new Webcam(this);
+  //setupAudioIn ();
+  //setupCamera ();
   
   //set up cdf functions
   setupPDF2DFromImageFile("heap.png");
@@ -343,21 +319,22 @@ void draw () {
   //fadeLastScene ();
   dissolveLastSceneWithProbability(0.4);
   
-  //read camera
-  if (cam.available() == true) {
-    cam.read();
-  }
-  //copy camera image to PIMage img
-  img.copy(cam , 0 , 0 , cam.width , cam.height , 0 , 0 , img.width , img.height);
+//  //read camera
+//  if (cam.available() == true) {
+//    cam.read();
+//  }
+//  //copy camera image to PIMage img
+//  img.copy(cam , 0 , 0 , cam.width , cam.height , 0 , 0 , img.width , img.height);
+  img = webcam.imageFromWebcam(scrnWidth,scrnHeight);
   
   //move items based on cam image
-  if (t % 1 == 0) {
+  if (frameCount % 1 == 0) {
     setupPDF2DFromImage ();
     moveAllItemsFromImageCDF ();
   }
 
   //get audio level
-  float lev = audioIn.left.level();
+  float lev = audioIn.level();
   if (lev > 0.5) {
     audioLevel = 255;
   } else {
@@ -396,8 +373,6 @@ void draw () {
     //show audiolev bar onscreen
     rect(0 , 0 , round(scrnWidth*lev) , 20);     
   }
-  
-  t++;
 };
 
 void keyPressed() {

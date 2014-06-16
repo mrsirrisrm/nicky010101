@@ -33,6 +33,8 @@ boolean changingShapes = true;
 boolean rotating = false;
 boolean iterating = true;
 boolean flocking = false;
+boolean showInfo = false;
+OnscreenInfo onscreenInfo;
 
 boolean volToSeparation = false;
 boolean volToAlignment = false;
@@ -53,9 +55,11 @@ float cohesionForce = 2.0;
 float audioLevel = 0.5;
 float forceMax = 6.0;
 
-int makeNthFrameToPNG = 0;
+int makeNthFrameToPNG = 0; //0 for no video
 int videoPNGCount = 0;
 
+Webcam webcam;
+AudioIn audioIn;
 
 //-----------------------------------------------------------------
 
@@ -102,9 +106,14 @@ void setup () {
   // the ControlFrame class setup() method below.
   //==================================================================
 
+  //setup inputs
+  //audioIn = new AudioIn(this);
+  //webcam = new Webcam(this);
 
   //set up cdf functions
-  setupPDF2DHeap("column.png");
+  setupPDF2DFromImageFile("column.png");
+  
+  onscreenInfo = new OnscreenInfo();
   
   //make the flock
   flock = new Flock(numParticles);
@@ -136,16 +145,32 @@ void draw () {
   //pointLight(102, 204, 255, 35, 40, 36);
   //ambientLight(102, 51, 126);
   
+  //to get webcam input 
+  //img = webcam.imageFromWebcam(scrnWidth,scrnHeight);
+  //move items based on cam image
+  //if (frameCount % 1 == 0) {
+  //  setupPDF2DFromImage ();
+  //  flock.moveAllItemsFromImageCDF ();
+  //}
+
+  //to get mic input
+  //audioLevel = audioIn.level();   
+  
+  if (showInfo) {
+    onscreenInfo.showAudio(audioLevel);  
+    onscreenInfo.showVideo();   
+  }
+  
   //changing shapes
   if (changingShapes) {  
     if (thisFrameForChangingShapes % 300 == 0) {
-      setupPDF2DHeap("column.png");
+      setupPDF2DFromImageFile("column.png");
       vectorAllItemsFromImageCDF ();
     } else if (thisFrameForChangingShapes % 300 == 100) {
-       setupPDF2DHeap("heap.png");
+       setupPDF2DFromImageFile("heap.png");
        vectorAllItemsFromImageCDF ();
     } else if (thisFrameForChangingShapes % 300 == 200) {
-      setupPDF2DHeap("cross.png");
+      setupPDF2DFromImageFile("cross.png");
       vectorAllItemsFromImageCDF ();
     }   
     thisFrameForChangingShapes++;
