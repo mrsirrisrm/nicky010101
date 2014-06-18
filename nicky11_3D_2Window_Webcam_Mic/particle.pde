@@ -11,6 +11,8 @@ class Particle {
   
   //target position
   PVector target;
+  boolean targetReached = true;
+  float   targetRadius = 5.0;
   
   //float friction = 0.97;
   //int updateIn; //get new values on this iteration
@@ -43,6 +45,7 @@ class Particle {
   
   void vectorTo (PVector vector) {
     target = vector;
+    targetReached = false;
   }
   
   private String getText () {
@@ -55,40 +58,28 @@ class Particle {
   }
   
   void iterate () {
-//    this.dx = this.dx * this.friction + this.ddx;
-//    this.dy = this.dy * this.friction + this.ddy;
-//    
-//    this.x += this.dx;
-//    if (this.x < 0 || this.x > scrnWidth) { 
-//      this.dx = -this.dx;
-//      this.ddx = -this.ddx; 
-//    }   
-//        
-//    this.y += this.dy;
-//    if (this.y < 0 || this.y > scrnHeight) { 
-//      this.dy = -this.dy;
-//      this.ddy = -this.ddy; 
-//    }
-//    
-//    this.updateIn--;
-//    if ( this.updateIn <= 0 ) {
-//      // 
-//      this.refreshUpdateIn();
-//      this.getNewVector();
-//    } 
-    
-    //move position towards target
-    if (pos.x != target.x) {
-      //velocity.x = (target.x - pos.x) / moveByDenominator; 
-      pos.x += (target.x - pos.x) / moveByDenominator; 
-    }
-    if (pos.y != target.y) {
-      //velocity.y = (target.y - pos.y) / moveByDenominator;
-      pos.y += (target.y - pos.y) / moveByDenominator;  
-    }
-    if (pos.z != target.z) {
-      //velocity.z = (target.z - pos.z) / moveByDenominator;
-      pos.z += velocity.z = (target.z - pos.z) / moveByDenominator;  
+ 
+    if (!targetReached) {    
+      //move position towards target
+      if (pos.x != target.x) {
+        //velocity.x = (target.x - pos.x) / moveByDenominator; 
+        pos.x += (target.x - pos.x) / moveByDenominator; 
+      }
+      if (pos.y != target.y) {
+        //velocity.y = (target.y - pos.y) / moveByDenominator;
+        pos.y += (target.y - pos.y) / moveByDenominator;  
+      }
+      if (pos.z != target.z) {
+        //velocity.z = (target.z - pos.z) / moveByDenominator;
+        pos.z += velocity.z = (target.z - pos.z) / moveByDenominator;  
+      }
+      
+      //once we get close enough to the target, stop trying to go to target
+      if (abs(pos.x - target.x) < targetRadius && 
+          abs(pos.y - target.y) < targetRadius && 
+          abs(pos.z - target.z) < targetRadius) {
+        targetReached = true;
+      }
     }
     
     //rotation velocity

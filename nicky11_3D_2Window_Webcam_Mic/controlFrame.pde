@@ -8,6 +8,7 @@ ControlFrame addControlFrame(String theName, int theWidth, int theHeight) {
   f.setLocation(100, 100);
   f.setResizable(false);
   f.setVisible(true);
+  p.parent = this;
   return p;
 }
 
@@ -45,6 +46,7 @@ public class ControlFrame extends PApplet {
   Button btZoomOut;
   Button btRotateRight;
   Button btRotateLeft;
+  Button btWebcam;
   
   public float getZoom () {
     if (zoomMoves.size() == 0) {
@@ -66,7 +68,19 @@ public class ControlFrame extends PApplet {
     }
   }
   
+  private void webcamShot () { 
+    println("Webcam shot");
+    img = webcam.imageFromWebcam(scrnWidth,scrnHeight);
+    //draw it to this frame
+    image(img, 300, 10, 200, 200); 
+    //move items based on cam image
+    setupPDF2DFromImage ();
+    flock.moveAllItemsFromImageCDF ();
+  }
+  
   public void setup() {
+    background(40);
+    
     color cbCol = color(2,119,168);
     size(w, h);
     frameRate(25);
@@ -215,7 +229,12 @@ public class ControlFrame extends PApplet {
      btRotateLeft = cp5.addButton("r-") 
        .setValue(1.08)
        .setPosition(130,370)
-       .setSize(20,20); 
+       .setSize(20,20);
+      
+     btWebcam = cp5.addButton("webcam") 
+       .setValue(0)
+       .setPosition(250,10)
+       .setSize(20,20);
   
     updateCheckboxes(); 
   }
@@ -282,7 +301,7 @@ public class ControlFrame extends PApplet {
   //================================================================
 
   public void draw() {
-      background(40);
+      //background(40);
   }
   
   private ControlFrame() {
@@ -363,6 +382,10 @@ public class ControlFrame extends PApplet {
       rotateLeft();
     }
     
+    if (theEvent.isFrom(btWebcam)) {
+      webcamShot ();
+    }
+    
   }
    
   //detect keypresses when control frame has focus
@@ -398,9 +421,18 @@ public class ControlFrame extends PApplet {
     
     //redrawing - pause 
     if (k == 'P') {
-      if (looping) noLoop();
-      else loop();
+      //println(this.parent);
+      //if (this.parent.looping) parent.noLoop();
+      //else parent.loop();
     }
+    
+    if (k == 'W') {
+      webcamShot ();
+    }
+    
+    
+    
+    //arrow keys - moving the view--------------------------
     
     //zoom in
     if (k == 107 || k == 33) {

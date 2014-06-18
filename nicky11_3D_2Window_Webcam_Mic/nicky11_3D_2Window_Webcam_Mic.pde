@@ -100,15 +100,12 @@ void setup () {
   // by calling function addControlFrame() a
   // new frame is created and an instance of class
   // ControlFrame is instanziated.
-  cf = addControlFrame("extra", 600, 600);
-
-  // add Controllers to the 'extra' Frame inside 
-  // the ControlFrame class setup() method below.
+  cf = addControlFrame("control", 600, 600);
   //==================================================================
 
   //setup inputs
-  //audioIn = new AudioIn(this);
-  //webcam = new Webcam(this);
+  audioIn = new AudioIn(this);
+  webcam = new Webcam(this);
 
   //set up cdf functions
   setupPDF2DFromImageFile("column.png");
@@ -154,7 +151,7 @@ void draw () {
   //}
 
   //to get mic input
-  //audioLevel = audioIn.level();   
+  audioLevel = audioIn.level();   
   
   if (showInfo) {
     onscreenInfo.showAudio(audioLevel);  
@@ -215,6 +212,6 @@ void draw () {
       videoPNGCount++;
     }
   } 
-};
+}
 
 
