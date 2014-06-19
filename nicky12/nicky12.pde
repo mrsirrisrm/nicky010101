@@ -12,8 +12,8 @@ int numParticles = 1000;
 Flock flock;
 
 int thisFrameForChangingShapes = 0;
-int scrnWidth = 800;
-int scrnHeight = 600;
+int scrnWidth = 1200;
+int scrnHeight = 800;
 float cameraDist;
 
 float[] cdfX = new float[scrnWidth];
@@ -29,16 +29,19 @@ int[][] imgPDF;
 int[] imgYCDF;
 int[][] imgCDF;
 
-boolean changingShapes = true;
+boolean changingShapes = false;
 boolean rotating = false;
 boolean iterating = true;
-boolean flocking = false;
+boolean flocking = true;
 boolean showInfo = false;
 OnscreenInfo onscreenInfo;
 
 boolean volToSeparation = false;
 boolean volToAlignment = false;
 boolean volToCohesion = false;
+
+boolean volToSpeedReversed = false;
+float maxParticleSpeed = 30.0;
 
 float dissolveProbability;
 float YRotationSpeed;
@@ -134,26 +137,25 @@ void setup () {
 
 void draw () {
   //clearing screen
-  //background(0, 0, 0);
-  dissolveLastSceneWithProbability(dissolveProbability);
-  fadeLastSceneBy(round(fadeSpeed)); 
+  background(0, 0, 0);
+  //dissolveLastSceneWithProbability(dissolveProbability);
+  //fadeLastSceneBy(round(fadeSpeed)); 
   
-  //lighting
-  //pointLight(102, 204, 255, 35, 40, 36);
-  //ambientLight(102, 51, 126);
-  
-  //to get webcam input 
-  //img = webcam.imageFromWebcam(scrnWidth,scrnHeight);
-  //move items based on cam image
-  //if (frameCount % 1 == 0) {
-  //  setupPDF2DFromImage ();
-  //  flock.moveAllItemsFromImageCDF ();
-  //}
-
   //to get mic input
-  audioLevel = audioIn.level();   
+  audioLevel = audioIn.level(); 
+  
+  if (volToSpeedReversed) {
+    maxParticleSpeed = (0.5 - audioLevel) * Particle.maxMaxSpeed;
+  } else {
+    maxParticleSpeed = audioLevel * Particle.maxMaxSpeed;
+  }
+  if (maxParticleSpeed < 2) { maxParticleSpeed = 2; }
+  //println(maxParticleSpeed);
+  
+//println(audioLevel);  
   
   if (showInfo) {
+    //println("ddd");
     onscreenInfo.showAudio(audioLevel);  
     onscreenInfo.showVideo();   
   }
@@ -176,12 +178,15 @@ void draw () {
   //volume to flocking params
   if (volToSeparation) {
     separationForce = audioLevel * forceMax; 
+    //println(separationForce);
   } 
   if (volToAlignment) {
     alignmentForce = audioLevel * forceMax; 
+    //println(alignmentForce);
   }
   if (volToCohesion) {
-    cohesionForce = audioLevel * forceMax; 
+    cohesionForce = audioLevel * forceMax;
+   //println(cohesionForce); 
   }
 
   //drawing and flocking

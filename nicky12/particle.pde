@@ -1,32 +1,38 @@
 class Particle { 
   //position
-  PVector pos; 
-  PVector velocity; 
-  PVector acceleration;
+  public  PVector pos; 
+  private PVector velocity; 
+  private PVector acceleration;
   
   //rotation
-  PVector rotation;
-  PVector rotationVelocity;
-  //float ddtX = 0, ddtY = 0, ddtZ = 0;
+  private PVector rotation;
+  private PVector rotationVelocity;
   
   //target position
-  PVector target;
-  boolean targetReached = true;
-  float   targetRadius = 5.0;
+  private PVector target;
+  private boolean targetReached = true;
+  private float   targetRadius = 5.0;
   
   //float friction = 0.97;
   //int updateIn; //get new values on this iteration
   //int maxUpdateTime = 50;
-  boolean isOne;
-  static final float moveByDenominator = 8;
-  static final float maxRotationSpeed = 0.06;
-  static final float maxspeed = 30;    // Maximum speed
-  static final float maxforce = 0.2;    // Maximum steering force
+  private boolean isOne;
+  private static final float moveByDenominator = 8;
+  private static final float maxRotationSpeed = 0.06;
+  //static final float maxspeed = 30;    // Maximum speed
+  public  static final float maxMaxSpeed = 200;
+  private static final float maxforce = 0.2;    // Maximum steering force
+  
+  public static final float minDistanceForForces = 100.0;
+  public static final float minDistanceForDontUpdateForNIterations = 2 * minDistanceForForces;
+  public static final float minDistanceForForcesSquared = minDistanceForForces*minDistanceForForces;
+  public static final float minDistanceForDontUpdateForNIterationsSquared = 2 * minDistanceForForcesSquared;
+  public static final int dontUpdateForNIterations = 5;
    
   //------------------------------------------------------------
   
   
-  Particle (PVector vector) {
+  public Particle (PVector vector) {
     pos = vector;
     //velocity = new PVector(0 , 0 , 0);
     float vMax = 50;
@@ -39,11 +45,11 @@ class Particle {
                                    random(-maxRotationSpeed , maxRotationSpeed));
   }
   
-  void moveTo (PVector vector) {
+  public void moveTo (PVector vector) {
     pos = vector;
   }
   
-  void vectorTo (PVector vector) {
+  public void vectorTo (PVector vector) {
     target = vector;
     targetReached = false;
   }
@@ -57,7 +63,7 @@ class Particle {
     return join(s,"");  
   }
   
-  void iterate () {
+  public void iterate () {
  
     if (!targetReached) {    
       //move position towards target
@@ -90,7 +96,7 @@ class Particle {
   }
   
   
-  void textDraw () {
+  public void textDraw () {
     pushMatrix();
     translate( pos.x , pos.y , pos.z * zScale); 
     rotateX(rotation.x);
@@ -122,10 +128,10 @@ class Particle {
     int count = 0;
     // For every boid in the system, check if it's too close
     for (int i = 0; i < particles.size(); i++) {
-      Particle other = particles.get(i);
       float d = distances[i];
       // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
       if ((d > 0) && (d < desiredseparation)) {
+        Particle other = particles.get(i);
         // Calculate vector pointing away from neighbor
         PVector diff = PVector.sub(pos, other.pos);
         diff.normalize();
@@ -147,7 +153,7 @@ class Particle {
 
       // Implement Reynolds: Steering = Desired - Velocity
       steer.normalize();
-      steer.mult(maxspeed);
+      steer.mult(maxParticleSpeed);//steer.mult(maxspeed);
       steer.sub(velocity);
       steer.limit(maxforce);
     }
@@ -161,9 +167,9 @@ class Particle {
     PVector sum = new PVector(0, 0);
     int count = 0;
     for (int i = 0; i < particles.size(); i++) {
-      Particle other = particles.get(i);
       float d = distances[i];
       if ((d > 0) && (d < neighbordist)) {
+        Particle other = particles.get(i);
         sum.add(other.velocity);
         count++;
       }
@@ -176,7 +182,7 @@ class Particle {
 
       // Implement Reynolds: Steering = Desired - Velocity
       sum.normalize();
-      sum.mult(maxspeed);
+      sum.mult(maxParticleSpeed);//sum.mult(maxspeed);
       PVector steer = PVector.sub(sum, velocity);
       steer.limit(maxforce);
       return steer;
@@ -193,9 +199,9 @@ class Particle {
     PVector sum = new PVector(0, 0);   // Start with empty vector to accumulate all locations
     int count = 0;
     for (int i = 0; i < particles.size(); i++) {
-      Particle other = particles.get(i);
       float d = distances[i];
       if ((d > 0) && (d < neighbordist)) {
+        Particle other = particles.get(i);
         sum.add(other.pos); // Add location
         count++;
       }
@@ -215,7 +221,7 @@ class Particle {
     PVector desired = PVector.sub(target, pos);  // A vector pointing from the location to the target
     // Scale to maximum speed
     desired.normalize();
-    desired.mult(maxspeed);
+    desired.mult(maxParticleSpeed);//desired.mult(maxspeed);
 
     // Above two lines of code below could be condensed with new PVector setMag() method
     // Not using this method until Processing.js catches up
@@ -229,12 +235,9 @@ class Particle {
   
   
   
-  void runFlocking(ArrayList<Particle> particles) {
-    flock(particles);
-    update();
-    //iterate();
-    //borders();
-    //render();
+  void runFlocking(ArrayList<Particle> particles, float[] distances) {
+    flock(particles, distances);
+    updateFromFlocking();
   }
 
   private void applyForce(PVector force) {
@@ -243,8 +246,8 @@ class Particle {
   }
 
   // We accumulate a new acceleration each time based on three rules
-  private void flock(ArrayList<Particle> particles) {
-    float[] distances = getDistances(particles);
+  private void flock(ArrayList<Particle> particles, float[] distances) {
+    //float[] distances = getDistances(particles);
     PVector sep = separate(particles,distances);   // Separation
     PVector ali = align(particles,distances);      // Alignment
     PVector coh = cohesion(particles,distances);   // Cohesion
@@ -259,12 +262,12 @@ class Particle {
     applyForce(coh);
   }
 
-  // Method to update location
-  void update() {
+  private void updateFromFlocking() {
     // Update velocity
     velocity.add(acceleration);
     // Limit speed
-    velocity.limit(maxspeed);
+    velocity.limit(maxParticleSpeed);//velocity.limit(maxspeed);
+    //rotation = velocity;
     pos.add(velocity);
     // Reset accelertion to 0 each cycle
     acceleration.mult(0);

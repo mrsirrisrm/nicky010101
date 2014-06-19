@@ -48,6 +48,9 @@ public class ControlFrame extends PApplet {
   Button btRotateLeft;
   Button btWebcam;
   
+  Button btHeap;
+  Button btCross;
+  
   public float getZoom () {
     if (zoomMoves.size() == 0) {
       return 1.0;
@@ -99,12 +102,12 @@ public class ControlFrame extends PApplet {
                   .plugTo(parent,"fadeSpeed")
                   .setRange(0, 100)
                   .setPosition(10,70)
-                  .setValue(50);
+                  .setValue(100);
     cp5.addSlider("dissolveProbability")
                   .plugTo(parent,"dissolveProbability")
                   .setRange(0, 1)
                   .setPosition(10,90)
-                  .setValue(0.0);
+                  .setValue(1.0);
     cp5.addSlider("Z Scale")
                   .plugTo(parent,"zScale")
                   .setRange(0, 1)
@@ -235,6 +238,17 @@ public class ControlFrame extends PApplet {
        .setValue(0)
        .setPosition(250,10)
        .setSize(20,20);
+  
+    btHeap  = cp5.addButton("heap") 
+       .setValue(0)
+       .setPosition(250,370)
+       .setSize(20,20);
+       
+       btCross  = cp5.addButton("cross") 
+       .setValue(0)
+       .setPosition(290,370)
+       .setSize(20,20);
+       
   
     updateCheckboxes(); 
   }
@@ -386,6 +400,15 @@ public class ControlFrame extends PApplet {
       webcamShot ();
     }
     
+    if (theEvent.isFrom(btHeap)) {
+      setupPDF2DFromImageFile("heap.png");
+       vectorAllItemsFromImageCDF ();
+    }
+
+    if (theEvent.isFrom(btCross)) {
+      setupPDF2DFromImageFile("cross.png");
+       vectorAllItemsFromImageCDF ();
+    }    
   }
    
   //detect keypresses when control frame has focus
@@ -412,6 +435,11 @@ public class ControlFrame extends PApplet {
     //rotating the camera
     if (k == 'R') {
       rotating = !rotating;  
+    }
+    
+    //rotating the camera
+    if (k == 'Q') {
+      volToSpeedReversed = !volToSpeedReversed;  
     }
     
     //flocking
