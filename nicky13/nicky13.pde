@@ -1,3 +1,12 @@
+import ddf.minim.ugens.Sink;
+import ddf.minim.effects.LowPassFS;
+import ddf.minim.effects.ChebFilter;
+import ddf.minim.effects.IIRFilter;
+import ddf.minim.effects.*;
+import ddf.minim.*;
+import ddf.minim.ugens.*;
+import ddf.minim.spi.*; // for AudioStream
+
 
 import java.awt.Frame;
 import java.awt.BorderLayout;
@@ -50,7 +59,9 @@ int makeNthFrameToPNG = 0; //0 for no video
 int videoPNGCount = 0;
 
 Webcam webcam;
-AudioIn audioIn;
+//AudioIn audioIn;
+Minim minim;
+FreqBalance freqBalance;
 
 //-----------------------------------------------------------------
 
@@ -99,6 +110,8 @@ void setup () {
 
   //setup inputs
   //audioIn = new AudioIn(this);
+  minim = new Minim(this);
+  freqBalance = new FreqBalance(1200);
   //webcam = new Webcam(this);
 
   //set up cdf functions
@@ -135,6 +148,16 @@ void draw () {
   
   //to get mic input
   //audioLevel = audioIn.level(); 
+  freqBalance.update();
+  
+  if (freqBalance.prevHighLev > 0.03 || freqBalance.prevLowLev > 0.03 ) {
+    int numToMove = abs(round(freqBalance.mix * 10.0));
+    if (freqBalance.mix > 0 ) {
+      flock.changeNCDF( numToMove , cdf1 );
+    } else {
+      flock.changeNCDF( numToMove , cdf2 );
+    }
+  }
   
   //if (volToSpeedReversed) {
   //  maxParticleSpeed = (0.5 - audioLevel) * Particle.maxMaxSpeed;
