@@ -27,6 +27,7 @@ public class ControlFrame extends PApplet {
   private ArrayList<Float> zoomMoves = new ArrayList<Float>();  
  
   Slider slYRotation;
+  Slider numberInCDF1;
   
   CheckBox cbRotating;
   CheckBox cbIterating;
@@ -122,6 +123,13 @@ public class ControlFrame extends PApplet {
                   .setRange(-0.2, 0.2)
                   .setPosition(10,130)
                   .setValue(0.025);
+    
+    numberInCDF1 = cp5.addSlider("CDF1 particles")
+                  .setRange(0, 1.0)
+                  .setPosition(10,370)
+                  .setSize(300,10)
+                  .setValue(1.0);
+ 
     
     
     //checkboxes controll item general behaviours
@@ -289,7 +297,10 @@ public class ControlFrame extends PApplet {
     while (controlYRotation < 0.0) {
       controlYRotation += 2*PI;  
     }
-    slYRotation.setValue(controlYRotation % (2*PI));    
+    slYRotation.setValue(controlYRotation % (2*PI));
+
+    float portionInCDF1 = float(flock.numberInCDF(cdf1)) / float(flock.particles.size());
+    numberInCDF1.setValue(portionInCDF1);    
   }
 
   private void updateCheckboxes () {
@@ -466,8 +477,17 @@ public class ControlFrame extends PApplet {
       //cdf2.vectorAllItemsFromImageCDF ();
     }    
     
-    if (theEvent.isFrom(btSendToCDF1)) {
-      flock.changeNCDF(50,cdf1);
+    if (theEvent.isFrom( btSendToCDF1 )) {
+      flock.changeNCDF( 50 , cdf1 );
+    }
+    
+    if (theEvent.isFrom( numberInCDF1 )) {
+      int targetNumberCDF1 = round(numberInCDF1.getValue() * flock.particles.size());
+      if ( targetNumberCDF1 > flock.numberInCDF(cdf1 )) {
+        flock.makeNInCDF( targetNumberCDF1 , cdf1 );
+      } else {
+        flock.makeNInCDF( flock.particles.size() - targetNumberCDF1 , cdf2 );
+      }
     }
     
   }

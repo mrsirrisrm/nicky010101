@@ -16,7 +16,7 @@ class Flock {
     }  
   }
   
-  void changeNCDF (int N, CDF cdf) {
+  public void changeNCDF (int N, CDF cdf) {
     int n = 0;
     for (Particle part : particles) {
       if (n < N) {
@@ -28,6 +28,25 @@ class Flock {
       }  
     }
   }
+  
+  public int numberInCDF (CDF cdf) {
+    int n = 0;
+    for (Particle part : particles) {
+      if (part.CDFParent == cdf) {
+        n++;        
+      }
+    }  
+    return n;    
+  }
+  
+  public void makeNInCDF (int N, CDF cdf) {
+    int currentN = numberInCDF(cdf);
+    if (N > currentN) {
+      changeNCDF(N - currentN,cdf);
+    } else {
+      //do nothing as we don't know which cdf to move them to
+    }
+  } 
   
   public void allTextDraw () {
     for (Particle part : particles) {

@@ -180,8 +180,11 @@ void draw () {
     timeYRotation += YRotationSpeed;
   }
   cameraDist *= cf.getZoom();
-  controlYRotation = (controlYRotation + cf.getYRotation()) % (2*PI);  
-  cf.updateSliders();
+  controlYRotation = (controlYRotation + cf.getYRotation()) % (2*PI);
+
+  if (frameCount % 5 == 0) {  
+    cf.updateSliders();
+  }
   
   camera(width/2 + cameraDist*sin(yRotation()), height/2 + cameraDist*sin(controlXRotation), cameraDist*cos(yRotation())*cos(controlXRotation), 
           width/2, height/2, 0, 
