@@ -12,7 +12,7 @@ import java.awt.Frame;
 import java.awt.BorderLayout;
 import controlP5.*;
 
-private ControlP5 cp5;
+//private ControlP5 cp5;
 
 ControlFrame cf;
 
@@ -102,7 +102,7 @@ void setup () {
   resetVariables();
   
   //CP5 - extra controller window -----------------------------------
-  cp5 = new ControlP5(this);
+  //cp5 = new ControlP5(this);
   
   // by calling function addControlFrame() a
   // new frame is created and an instance of class
@@ -163,6 +163,15 @@ void draw () {
       flock.changeNCDF( numToMove , cdf1 );
     }
   }
+  
+  maxParticleSpeed = map(freqBalance.level() ,
+                         0.0,
+                         audioThreshold * 2.0,
+                         cf.slMaxSpeed.getMin(),
+                         cf.slMaxSpeed.getMax());
+                         
+  //println(freqBalance.level());
+  //println(audioThreshold * 2.0);
   
   //if (volToSpeedReversed) {
   //  maxParticleSpeed = (0.5 - audioLevel) * Particle.maxMaxSpeed;

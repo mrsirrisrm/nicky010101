@@ -6,7 +6,7 @@ class FreqBalance {
   EnvelopeFollower loEnv;
   EnvelopeFollower highEnv;
   Sink sink;
-  Summer sum, sumOut;
+  Summer sum;
   float prevHighLev = 0.0, prevLowLev = 0.0;
   float mix = 0.0;
   final float levelDecay = 0.8; 
@@ -40,10 +40,10 @@ class FreqBalance {
                                       1024 // size of buffer to analyze 
                                     );                                  
     Summer sum = new Summer();
-    Summer sumOut = new Summer();
+    //Summer sumOut = new Summer();
                               
-    in.patch(lowFilter).patch(loEnv).patch(sumOut).patch(sink).patch(out);
-    lowFilter.patch(invert).patch(sum).patch(highEnv).patch(sumOut);
+    in.patch(lowFilter).patch(loEnv).patch(sink).patch(out);
+    lowFilter.patch(invert).patch(sum).patch(highEnv).patch(sink);
     in.patch(sum);
   }
   
@@ -65,5 +65,9 @@ class FreqBalance {
   
   public float greaterLevel () {
     return max( prevHighLev, prevLowLev );
+  }
+  
+  public float level() {
+    return prevHighLev + prevLowLev;
   }
 }

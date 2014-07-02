@@ -16,7 +16,7 @@ int luminanceFromColor (color c) {
 }
 
 int distortRange (int a, int mn, int mx) {
-  int b;
+  //int b;
  if (a < mn) {
   return 0;
  } else if (a > mx) {

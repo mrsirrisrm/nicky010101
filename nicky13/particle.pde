@@ -20,7 +20,7 @@ class Particle {
   //private static final float moveByDenominator = 8;
   private static final float maxRotationSpeed = 0.06;
   //static final float maxspeed = 30;    // Maximum speed
-  public  static final float maxMaxSpeed = 200;
+  public  static final float maxMaxSpeed = 50.0;
   private static final float maxforce = 0.2;    // Maximum steering force
   
   public static final float minDistanceForForces = 100.0;

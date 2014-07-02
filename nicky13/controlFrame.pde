@@ -30,7 +30,8 @@ public class ControlFrame extends PApplet {
   Slider slYRotation;
   Slider numberInCDF2;
   Slider slAudioSplitFreq;
-  Slider slAudioThreshold; 
+  Slider slAudioThreshold;
+  Slider slMaxSpeed; 
   
   CheckBox cbRotating;
   CheckBox cbIterating;
@@ -214,7 +215,7 @@ public class ControlFrame extends PApplet {
                 .setPosition(10,330)
                 .setSize(300,10)
                 .setValue(2.0);                
-  cp5.addSlider("maxSpeed"  )
+  slMaxSpeed = cp5.addSlider("maxSpeed"  )
                 .plugTo(parent,"maxParticleSpeed"  )
                 .setRange(0.0, Particle.maxMaxSpeed)
                 .setPosition(10,350)
