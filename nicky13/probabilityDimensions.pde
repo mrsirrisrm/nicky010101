@@ -12,7 +12,7 @@ class CDF {
     sourceFile = "";
   }
   
-  void setupPDF2DFromImageFile (String filename) {
+  public void setupPDF2DFromImageFile (String filename) {
     //loading image 
     String path = "../../resources/";
     sourceFile = path + filename;
@@ -24,7 +24,7 @@ class CDF {
     }
   }
   
-  void setupPDF2DFromImage () {
+  public void setupPDF2DFromImage () {
   
     img.resize( width , height );
     img.loadPixels();
@@ -59,7 +59,7 @@ class CDF {
   
   }  
   
-  int weightedRandomInt2DX () {
+  public int weightedRandomInt2DX () {
     int i = 0;
     int compare = int(random(0,2147483646) % imgYCDF[imgYCDF.length - 1]); 
     while (i < imgYCDF.length && imgYCDF[i] < compare) {
@@ -68,7 +68,7 @@ class CDF {
     return i;
   }
   
-  int weightedRandomInt2DY (int x) {
+  public int weightedRandomInt2DY (int x) {
     int j = 0;
     int compare = int(random(0,2147483646) % imgCDF[x][imgCDF[x].length - 1]); 
     while (j < imgCDF[x].length && imgCDF[x][j] < compare) {
@@ -76,21 +76,8 @@ class CDF {
     }
     return j;
   }
-  
-  public void vectorParticleFromCDF (Particle part) {
-    int x = weightedRandomInt2DX () ;
-    part.vectorTo(new PVector(x , weightedRandomInt2DY( x ), randomZ()) , this);  
-  }
-  
-  public void vectorAllItemsFromImageCDF () {
-    for (Particle part : flock.particles) {
-      if (part.CDFParent == this) {
-        vectorParticleFromCDF(part);  
-      } 
-    }   
-  }
-  
-  float randomZ () {
+    
+  public float randomZ () {
     return random(-width / 2 , width / 2);
   }
 

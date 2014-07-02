@@ -17,6 +17,7 @@ ControlFrame addControlFrame(String theName, int theWidth, int theHeight) {
 // new frame with a controlP5 object loaded
 public class ControlFrame extends PApplet {
   int w, h;
+  int updateAudioFeedbackOnNthFrame = 5;
   
   //private final static float rotateOnKeypressByRadians = 0.1;
   private final static float rotateFactor = 0.02;
@@ -27,17 +28,19 @@ public class ControlFrame extends PApplet {
   private ArrayList<Float> zoomMoves = new ArrayList<Float>();  
  
   Slider slYRotation;
-  Slider numberInCDF1;
+  Slider numberInCDF2;
+  Slider slAudioSplitFreq;
+  Slider slAudioThreshold; 
   
   CheckBox cbRotating;
   CheckBox cbIterating;
-  CheckBox cbChangingShapes;
+  //CheckBox cbChangingShapes;
   CheckBox cbFlocking;
   CheckBox cbShowInfo;
 
-  CheckBox cbVolToSeparation;
-  CheckBox cbVolToAlignment;
-  CheckBox cbVolToCohesion;
+  //CheckBox cbVolToSeparation;
+  //CheckBox cbVolToAlignment;
+  //CheckBox cbVolToCohesion;
   
   Button btXPLus100;
   Button btXMinus100;
@@ -47,14 +50,15 @@ public class ControlFrame extends PApplet {
   Button btZoomOut;
   Button btRotateRight;
   Button btRotateLeft;
-  Button btWebcam;
   
+  Button btWebcamCDF1;
+  Button btWebcamCDF2;
   Button btHeap1;
   Button btCross1;
   Button btHeap2;
   Button btCross2;  
-  Button btSendToCDF1;
-  Button btSendToCDF2;
+  //Button btSendToCDF1;
+  //Button btSendToCDF2;
   
   public float getZoom () {
     if (zoomMoves.size() == 0) {
@@ -76,14 +80,20 @@ public class ControlFrame extends PApplet {
     }
   }
   
-  private void webcamShot (CDF cdf) { 
-    println("Webcam shot");
-    cdf.img = webcam.imageFromWebcam(width,height);
-    //draw it to this frame
-    image(cdf.img, 300, 10, 200, 200); 
-    //move items based on cam image
-    cdf.setupPDF2DFromImage ();
-    flock.moveAllItemsFromImageCDF (cdf);
+  private void webcamShot (CDF cdf) {
+    if (webcam != null) { 
+      println("Webcam shot");
+      cdf.img = webcam.imageFromWebcam(width,height);
+      //draw it to this frame
+      image( cdf.img, 
+             300, 
+             10, 
+             200, 
+             200); 
+      //move items based on cam image
+      cdf.setupPDF2DFromImage();
+      flock.moveAllItemsFromImageCDF( cdf );
+    }
   }
   
   public void setup() {
@@ -124,13 +134,22 @@ public class ControlFrame extends PApplet {
                   .setPosition(10,130)
                   .setValue(0.025);
     
-    numberInCDF1 = cp5.addSlider("CDF1 particles")
+    numberInCDF2 = cp5.addSlider("CDF2 particles")
                   .setRange(0, 1.0)
                   .setPosition(10,370)
                   .setSize(300,10)
-                  .setValue(1.0);
- 
-    
+                  .setValue(0.0); 
+    slAudioSplitFreq = cp5.addSlider("Split frequency")
+                  .setRange(20.0, 5000.0)
+                  .setPosition(10,390)
+                  .setSize(300,10)
+                  .setValue(1200.0);
+    slAudioThreshold = cp5.addSlider("Audio threshold")
+                  .setRange(0.001, 0.06)
+                  .plugTo(parent,"audioThreshold" )
+                  .setPosition(10,410)
+                  .setSize(300,10)
+                  .setValue(0.03);
     
     //checkboxes controll item general behaviours
       cbRotating = cp5.addCheckBox("cbRotating")
@@ -147,13 +166,13 @@ public class ControlFrame extends PApplet {
                 .setColorLabel(color(255))
                 .setSize(20, 15)
                 .addItem("iterating", 0);
-      cbChangingShapes = cp5.addCheckBox("cbChangingShapes")
-                .setPosition(10, 210)
-                .setColorForeground(color(120))
-                .setColorActive(cbCol)
-                .setColorLabel(color(255))
-                .setSize(20, 15)
-                .addItem("changing shapes", 0);         
+//      cbChangingShapes = cp5.addCheckBox("cbChangingShapes")
+//                .setPosition(10, 210)
+//                .setColorForeground(color(120))
+//                .setColorActive(cbCol)
+//                .setColorLabel(color(255))
+//                .setSize(20, 15)
+//                .addItem("changing shapes", 0);         
       cbFlocking = cp5.addCheckBox("cbFlocking")
                 .setPosition(10, 230)
                 .setColorForeground(color(120))
@@ -175,21 +194,25 @@ public class ControlFrame extends PApplet {
                 .plugTo(parent,"separationForce")
                 .setRange(0.0, forceMax)
                 .setPosition(10,270)
+                .setSize(300,10)
                 .setValue(3.0);
     cp5.addSlider("alignmentForce" )
                 .plugTo(parent,"alignmentForce" )
                 .setRange(0.0, forceMax)
                 .setPosition(10,290)
+                .setSize(300,10)
                 .setValue(2.0);
     cp5.addSlider("cohesionForce"  )
                 .plugTo(parent,"cohesionForce"  )
                 .setRange(0.0, forceMax)
                 .setPosition(10,310)
+                .setSize(300,10)
                 .setValue(2.0);
   cp5.addSlider("homeForce"  )
                 .plugTo(parent,"homeForce"  )
                 .setRange(0.0, forceMax)
                 .setPosition(10,330)
+                .setSize(300,10)
                 .setValue(2.0);                
   cp5.addSlider("maxSpeed"  )
                 .plugTo(parent,"maxParticleSpeed"  )
@@ -198,32 +221,32 @@ public class ControlFrame extends PApplet {
                 .setSize(300,10)
                 .setValue(2.0);  
                 
-   //force checkbuttons
-      cbVolToSeparation = cp5.addCheckBox("cbVolToSeparation")
-                .setPosition(220, 270)
-                .setColorForeground(color(120))
-                .setColorActive(cbCol)
-                .setColorLabel(color(255))
-                .setSize(20, 15)
-                .addItem("V->Separation", 0); 
-      cbVolToAlignment = cp5.addCheckBox("cbVolToAlignment")
-                .setPosition(220, 290)
-                .setColorForeground(color(120))
-                .setColorActive(cbCol)
-                .setColorLabel(color(255))
-                .setSize(20, 15)
-                .addItem("V->Alignment", 0); 
-      cbVolToCohesion = cp5.addCheckBox("cbVolToCohesion")
-                .setPosition(220, 310)
-                .setColorForeground(color(120))
-                .setColorActive(cbCol)
-                .setColorLabel(color(255))
-                .setSize(20, 15)
-                .addItem("V->Cohesion", 0); 
+//   //force checkbuttons
+//      cbVolToSeparation = cp5.addCheckBox("cbVolToSeparation")
+//                .setPosition(220, 270)
+//                .setColorForeground(color(120))
+//                .setColorActive(cbCol)
+//                .setColorLabel(color(255))
+//                .setSize(20, 15)
+//                .addItem("V->Separation", 0); 
+//      cbVolToAlignment = cp5.addCheckBox("cbVolToAlignment")
+//                .setPosition(220, 290)
+//                .setColorForeground(color(120))
+//                .setColorActive(cbCol)
+//                .setColorLabel(color(255))
+//                .setSize(20, 15)
+//                .addItem("V->Alignment", 0); 
+//      cbVolToCohesion = cp5.addCheckBox("cbVolToCohesion")
+//                .setPosition(220, 310)
+//                .setColorForeground(color(120))
+//                .setColorActive(cbCol)
+//                .setColorLabel(color(255))
+//                .setSize(20, 15)
+//                .addItem("V->Cohesion", 0); 
                
           
      //view control buttons  
-    int moveButtonsDown = 50;   
+    int moveButtonsDown = 90;   
      btXPLus100 = cp5.addButton("x+") //move to current screen right (may not be +x!) 
        .setValue(100)
        .setPosition(90,370 + moveButtonsDown)
@@ -258,11 +281,10 @@ public class ControlFrame extends PApplet {
        .setPosition(130,370 + moveButtonsDown)
        .setSize(20,20);
       
-     btWebcam = cp5.addButton("webcam") 
+     btWebcamCDF1 = cp5.addButton("1:webcam") 
        .setValue(0)
-       .setPosition(250,10)
+       .setPosition(210,370 + moveButtonsDown)
        .setSize(20,20);
-  
     btHeap1 = cp5.addButton("1:heap") 
        .setValue(0)
        .setPosition(250,370 + moveButtonsDown)
@@ -271,11 +293,15 @@ public class ControlFrame extends PApplet {
        .setValue(0)
        .setPosition(290,370 + moveButtonsDown)
        .setSize(20,20);
-   btSendToCDF2 = cp5.addButton("send N v") 
-       .setValue(20)
-       .setPosition(330,370 + moveButtonsDown)
-       .setSize(20,20);    
+//   btSendToCDF2 = cp5.addButton("send N v") 
+//       .setValue(20)
+//       .setPosition(330,370 + moveButtonsDown)
+//       .setSize(20,20);    
 
+     btWebcamCDF2 = cp5.addButton("2:webcam") 
+       .setValue(0)
+       .setPosition(210,410 + moveButtonsDown)
+       .setSize(20,20);
     btHeap2 = cp5.addButton("2:heap") 
        .setValue(0)
        .setPosition(250,410 + moveButtonsDown)
@@ -284,10 +310,10 @@ public class ControlFrame extends PApplet {
        .setValue(0)
        .setPosition(290,410 + moveButtonsDown)
        .setSize(20,20);
-   btSendToCDF1 = cp5.addButton("send N ^") 
-       .setValue(20)
-       .setPosition(330,410 + moveButtonsDown)
-       .setSize(20,20);    
+//   btSendToCDF1 = cp5.addButton("send N ^") 
+//       .setValue(20)
+//       .setPosition(330,410 + moveButtonsDown)
+//       .setSize(20,20);    
 
   
     updateCheckboxes(); 
@@ -299,8 +325,10 @@ public class ControlFrame extends PApplet {
     }
     slYRotation.setValue(controlYRotation % (2*PI));
 
-    float portionInCDF1 = float(flock.numberInCDF(cdf1)) / float(flock.particles.size());
-    numberInCDF1.setValue(portionInCDF1);    
+    float portionInCDF2 = float(flock.numberInCDF(cdf2)) / float(flock.particles.size());
+    numberInCDF2.setValue(portionInCDF2);
+
+    //slAudioSplitFreq.setValue( AudioSplitFreq );    
   }
 
   private void updateCheckboxes () {
@@ -316,11 +344,11 @@ public class ControlFrame extends PApplet {
       cbIterating.deactivate(0);
     }
     
-    if (changingShapes) {
-      cbChangingShapes.activate(0); 
-    } else {
-      cbChangingShapes.deactivate(0);
-    } 
+//    if (changingShapes) {
+//      cbChangingShapes.activate(0); 
+//    } else {
+//      cbChangingShapes.deactivate(0);
+//    } 
  
     if (flocking) {
       cbFlocking.activate(0); 
@@ -334,35 +362,92 @@ public class ControlFrame extends PApplet {
       cbShowInfo.deactivate(0);
     }
     
-    //--------------hook up vol to flocking params---------------------
-    if (volToSeparation) {
-      cbVolToSeparation.activate(0);  
-    } else {
-      cbVolToSeparation.deactivate(0);
-    }
-
-    if (volToAlignment) {
-      cbVolToAlignment.activate(0);  
-    } else {
-      cbVolToAlignment.deactivate(0);
-    }
-
-    if (volToCohesion) {
-      cbVolToCohesion.activate(0);  
-    } else {
-      cbVolToCohesion.deactivate(0);
-    } 
+//    //--------------hook up vol to flocking params---------------------
+//    if (volToSeparation) {
+//      cbVolToSeparation.activate(0);  
+//    } else {
+//      cbVolToSeparation.deactivate(0);
+//    }
+//
+//    if (volToAlignment) {
+//      cbVolToAlignment.activate(0);  
+//    } else {
+//      cbVolToAlignment.deactivate(0);
+//    }
+//
+//    if (volToCohesion) {
+//      cbVolToCohesion.activate(0);  
+//    } else {
+//      cbVolToCohesion.deactivate(0);
+//    } 
   }
 
 
   //================================================================
 
   public void draw() {
-      //background(40);
+    if (frameCount % updateAudioFeedbackOnNthFrame == 0) {
+      //draw the audio feedback cues
+      
+      background(40);    
+//      float maxVerticalBarLength = 200;
+//      float low = freqBalance.prevLowLev * maxVerticalBarLength;
+//      rect( 0 , 
+//            this.height - low , 
+//            50 , 
+//            low );
+//      float high = freqBalance.prevHighLev * maxVerticalBarLength;
+//      rect( 60, 
+//            this.height - high, 
+//            110, 
+//            high );
+      
+      //println(freqBalance.mix);
+      stroke(255.0);
+      strokeWeight(12.0);
+      strokeCap(ROUND);
+     
+//      //line showing freq balance 
+//      line(this.width - 40 , 
+//           this.height/2, 
+//           this.width - 40, 
+//           this.height/2 - freqBalance.mix * 100);
+           
+      //lines showing level
+      float pxForMaxAudioThreshold = 300; 
+      float pxForStartAudioLevelBar = 20;
+      line(this.width - 80,
+           this.height - pxForStartAudioLevelBar,
+           this.width - 80,
+           this.height - (pxForStartAudioLevelBar + pxForMaxAudioThreshold * freqBalance.prevLowLev / slAudioThreshold.getMax()) );      
+      
+      line(this.width - 40,
+           this.height - pxForStartAudioLevelBar,
+           this.width - 40,
+           this.height - (pxForStartAudioLevelBar + pxForMaxAudioThreshold * freqBalance.prevHighLev / slAudioThreshold.getMax()) );      
+
+      //line showing threshold
+      strokeWeight(3.0);
+      strokeCap(NORMAL);     
+      line(this.width - 100,
+           this.height - (pxForStartAudioLevelBar + pxForMaxAudioThreshold * slAudioThreshold.getValue() / slAudioThreshold.getMax() ),
+           this.width - 20,
+           this.height - (pxForStartAudioLevelBar + pxForMaxAudioThreshold * slAudioThreshold.getValue() / slAudioThreshold.getMax() ) );      
+           
+      
+//      if ( freqBalance.greaterLevel() > audioThreshold ) {
+//        //stroke(255.0);
+//        line(20, 
+//             this.height - 60 , 
+//             20, 
+//             this.height - 60 );
+//      }  
+    }
+      
   }
   
-  private ControlFrame() {
-  }
+  //private ControlFrame() {
+  //}
 
   public ControlFrame(Object theParent, int theWidth, int theHeight) {
     parent = theParent;
@@ -383,9 +468,9 @@ public class ControlFrame extends PApplet {
       iterating = cbIterating.getState(0);
     }
     
-    if (theEvent.isFrom(cbChangingShapes)) {
-      changingShapes = cbChangingShapes.getState(0);
-    }
+//    if (theEvent.isFrom(cbChangingShapes)) {
+//      changingShapes = cbChangingShapes.getState(0);
+//    }
     
     if (theEvent.isFrom(cbFlocking)) {
       flocking = cbFlocking.getState(0);
@@ -395,18 +480,18 @@ public class ControlFrame extends PApplet {
       showInfo = cbShowInfo.getState(0);
     }
     
-    //-----------------volume to flocking params---------------------------
-    if (theEvent.isFrom(cbVolToSeparation)) {
-      volToSeparation = cbVolToSeparation.getState(0);
-    }
-    
-    if (theEvent.isFrom(cbVolToAlignment)) {
-      volToAlignment = cbVolToAlignment.getState(0);
-    }
-    
-    if (theEvent.isFrom(cbVolToCohesion)) {
-      volToCohesion = cbVolToCohesion.getState(0);
-    }
+//    //-----------------volume to flocking params---------------------------
+//    if (theEvent.isFrom(cbVolToSeparation)) {
+//      volToSeparation = cbVolToSeparation.getState(0);
+//    }
+//    
+//    if (theEvent.isFrom(cbVolToAlignment)) {
+//      volToAlignment = cbVolToAlignment.getState(0);
+//    }
+//    
+//    if (theEvent.isFrom(cbVolToCohesion)) {
+//      volToCohesion = cbVolToCohesion.getState(0);
+//    }
     
     
     //----------------------------view control buttons---------------------------
@@ -439,10 +524,14 @@ public class ControlFrame extends PApplet {
       rotateLeft();
     }
     
-    if (theEvent.isFrom(btWebcam)) {
-      webcamShot (cdf1);
+    if (theEvent.isFrom(btWebcamCDF1)) {
+      webcamShot ( cdf1 );
     }
     
+    if (theEvent.isFrom(btWebcamCDF2)) {
+      webcamShot ( cdf2 );
+    }
+
     if (theEvent.isFrom(btHeap1)) {
       sendAllToCDFWithImage(cdf1, "heap.png");
       //cdf1.setupPDF2DFromImageFile("heap.png");
@@ -457,9 +546,9 @@ public class ControlFrame extends PApplet {
       //cdf1.vectorAllItemsFromImageCDF ();
     }    
     
-    if (theEvent.isFrom(btSendToCDF2)) {
-      flock.changeNCDF(50,cdf2);
-    }
+//    if (theEvent.isFrom(btSendToCDF2)) {
+//      flock.changeNCDF(50,cdf2);
+//    }
     
     
     
@@ -477,25 +566,33 @@ public class ControlFrame extends PApplet {
       //cdf2.vectorAllItemsFromImageCDF ();
     }    
     
-    if (theEvent.isFrom( btSendToCDF1 )) {
-      flock.changeNCDF( 50 , cdf1 );
-    }
+//    if (theEvent.isFrom( btSendToCDF1 )) {
+//      flock.changeNCDF( 50 , cdf1 );
+//    }
     
-    if (theEvent.isFrom( numberInCDF1 )) {
-      int targetNumberCDF1 = round(numberInCDF1.getValue() * flock.particles.size());
-      if ( targetNumberCDF1 > flock.numberInCDF(cdf1 )) {
-        flock.makeNInCDF( targetNumberCDF1 , cdf1 );
+    if (theEvent.isFrom( numberInCDF2 )) {
+      int targetNumberCDF2 = round(numberInCDF2.getValue() * flock.particles.size());
+      if ( targetNumberCDF2 > flock.numberInCDF(cdf2 )) {
+        flock.makeNInCDF( targetNumberCDF2 , cdf2 );
       } else {
-        flock.makeNInCDF( flock.particles.size() - targetNumberCDF1 , cdf2 );
+        flock.makeNInCDF( flock.particles.size() - targetNumberCDF2 , cdf1 );
       }
     }
+    
+    if (theEvent.isFrom( slAudioSplitFreq )) {
+      freqBalance.setSplitFrequency( slAudioSplitFreq.getValue() );
+    }
+    
+//    if (theEvent.isFrom( slAudioThreshold )) {
+//      audioThreshold = slAudioThreshold.getValue();
+//    }
     
   }
    
    private void sendAllToCDFWithImage (CDF cdf, String filename) {
      cdf.setupPDF2DFromImageFile(filename);
-     flock.changeNCDF(flock.particles.size(), cdf);
-     cdf.vectorAllItemsFromImageCDF ();
+     flock.changeNCDF( flock.particles.size(), cdf );
+     flock.vectorAllItemsFromImageCDF ( cdf );
    }
    
   //detect keypresses when control frame has focus
@@ -503,10 +600,10 @@ public class ControlFrame extends PApplet {
     final int k = keyCode;
     //println(k);
     
-    //cycling through the available shapes
-    if (k == 'C') {
-      changingShapes = !changingShapes;
-    }
+//    //cycling through the available shapes
+//    if (k == 'C') {
+//      changingShapes = !changingShapes;
+//    }
 
     if (k == 'Q') {
       zoomMoves.clear();

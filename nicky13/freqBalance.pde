@@ -2,7 +2,6 @@ class FreqBalance {
   AudioOutput out;
   LiveInput in;
   IIRFilter lowFilter;
-  //IIRFilter highFilter;
   Multiplier invert;
   EnvelopeFollower loEnv;
   EnvelopeFollower highEnv;
@@ -18,7 +17,7 @@ class FreqBalance {
 
     out = minim.getLineOut();
     
-    // we ask for an input with the same audio properties as the output.
+    // ask for an input with the same audio properties as the output.
     AudioStream inputStream = minim.getInputStream( out.getFormat().getChannels(), 
                                                     out.bufferSize(), 
                                                     out.sampleRate(), 
@@ -60,6 +59,11 @@ class FreqBalance {
     mix = log( prevHighLev / prevLowLev );
   }
   
+  public void setSplitFrequency (float splitFrequency) {
+    lowFilter.setFreq( splitFrequency );  
+  } 
   
-  
+  public float greaterLevel () {
+    return max( prevHighLev, prevLowLev );
+  }
 }

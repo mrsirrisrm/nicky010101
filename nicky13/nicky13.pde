@@ -27,16 +27,16 @@ CDF cdf1, cdf2;
 
 PFont aFont;
 
-boolean changingShapes = false;
+//boolean changingShapes = false;
 boolean rotating = false;
 boolean iterating = true;
 boolean flocking = true;
 boolean showInfo = false;
 OnscreenInfo onscreenInfo;
 
-boolean volToSeparation = false;
-boolean volToAlignment = false;
-boolean volToCohesion = false;
+//boolean volToSeparation = false;
+//boolean volToAlignment = false;
+//boolean volToCohesion = false;
 
 boolean volToSpeedReversed = false;
 float maxParticleSpeed = 30.0;
@@ -53,6 +53,8 @@ float cohesionForce = 2.0;
 float homeForce = 6.0;
 
 float audioLevel = 0.2;
+float audioThreshold = 0.03;
+//float AudioSplitFreq = 1200.0;
 float forceMax = 6.0;
 
 int makeNthFrameToPNG = 0; //0 for no video
@@ -111,12 +113,12 @@ void setup () {
   //setup inputs
   //audioIn = new AudioIn(this);
   minim = new Minim(this);
-  freqBalance = new FreqBalance(1200);
+  freqBalance = new FreqBalance( 1200.0 );
   //webcam = new Webcam(this);
 
   //set up cdf functions
-  cdf2.setupPDF2DFromImageFile("cross.png");
   cdf1.setupPDF2DFromImageFile("heap.png");
+  cdf2.setupPDF2DFromImageFile("cross.png");
   
   onscreenInfo = new OnscreenInfo();
   
@@ -127,10 +129,11 @@ void setup () {
   for (Particle part : flock.particles) {
     part.CDFParent = cdf1;
   }
-  cdf1.vectorAllItemsFromImageCDF ();
+  flock.moveAllItemsFromImageCDF( cdf1 );
+  flock.vectorAllItemsFromImageCDF( cdf1 );
   
-  println("width " , size().width);
-  println("height ", size().height);
+  println("width " , width);
+  println("height ", height);
   
   long allocated = Runtime.getRuntime().totalMemory();
   long free = Runtime.getRuntime().freeMemory();
@@ -150,12 +153,14 @@ void draw () {
   //audioLevel = audioIn.level(); 
   freqBalance.update();
   
-  if (freqBalance.prevHighLev > 0.03 || freqBalance.prevLowLev > 0.03 ) {
+  if (freqBalance.prevHighLev > audioThreshold || freqBalance.prevLowLev > audioThreshold ) {
     int numToMove = abs(round(freqBalance.mix * 10.0));
     if (freqBalance.mix > 0 ) {
-      flock.changeNCDF( numToMove , cdf1 );
-    } else {
+      //higher freqs dominate 
       flock.changeNCDF( numToMove , cdf2 );
+    } else {
+      //lower freqs dominate
+      flock.changeNCDF( numToMove , cdf1 );
     }
   }
   
@@ -175,19 +180,19 @@ void draw () {
     onscreenInfo.showVideo();   
   }
    
-  //volume to flocking params
-  if (volToSeparation) {
-    separationForce = audioLevel * forceMax; 
-    //println(separationForce);
-  } 
-  if (volToAlignment) {
-    alignmentForce = audioLevel * forceMax; 
-    //println(alignmentForce);
-  }
-  if (volToCohesion) {
-    cohesionForce = audioLevel * forceMax;
-   //println(cohesionForce); 
-  }
+//  //volume to flocking params
+//  if (volToSeparation) {
+//    separationForce = audioLevel * forceMax; 
+//    //println(separationForce);
+//  } 
+//  if (volToAlignment) {
+//    alignmentForce = audioLevel * forceMax; 
+//    //println(alignmentForce);
+//  }
+//  if (volToCohesion) {
+//    cohesionForce = audioLevel * forceMax;
+//   //println(cohesionForce); 
+//  }
 
   //drawing and flocking
   flock.allTextDraw ();

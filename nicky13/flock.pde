@@ -21,7 +21,7 @@ class Flock {
     for (Particle part : particles) {
       if (n < N) {
         if (part.CDFParent != cdf) {
-          cdf.vectorParticleFromCDF(part);
+          flock.vectorParticleFromCDF( part, cdf );
           //println(n,"   ",part);
           n++;        
         }
@@ -77,14 +77,27 @@ class Flock {
   
   public void moveAllItemsFromImageCDF (CDF cdf) {
     for (Particle part : particles) {
-      moveParticleFromImageCFG(part, cdf);   
+      moveParticleFromImageCDF(part, cdf);   
     }   
   }  
   
-  private void moveParticleFromImageCFG (Particle part, CDF cdf) {
+  private void moveParticleFromImageCDF (Particle part, CDF cdf) {
     int x = cdf.weightedRandomInt2DX () ;
     part.moveTo(new PVector(float(x) , float(cdf.weightedRandomInt2DY( x )) , part.pos.z) , cdf);    
   }
+  
+  public void vectorAllItemsFromImageCDF (CDF cdf) {
+    for (Particle part : flock.particles) {
+      if (part.CDFParent == cdf) {
+        vectorParticleFromCDF( part, cdf );  
+      } 
+    }   
+  }  
+  
+  public void vectorParticleFromCDF (Particle part, CDF cdf) {
+    int x = cdf.weightedRandomInt2DX () ;
+    part.vectorTo(new PVector(x , cdf.weightedRandomInt2DY( x ), cdf.randomZ()) , cdf);  
+  }  
   
   private void calcAllDistances () {
     for (int i = 0; i < particles.size(); i++ ) {

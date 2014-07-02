@@ -30,7 +30,7 @@ class Particle {
   public static final int dontUpdateForNIterations = 5;
   
   //CDF parent: who set our target
-  Object CDFParent;
+  CDF CDFParent;
    
   //------------------------------------------------------------
   
@@ -49,12 +49,12 @@ class Particle {
                                    random(-maxRotationSpeed , maxRotationSpeed));
   }
   
-  public void moveTo (PVector vector, Object sender) {
+  public void moveTo (PVector vector, CDF sender) {
     pos = vector;
     CDFParent = sender;
   }
   
-  public void vectorTo (PVector vector, Object sender) {
+  public void vectorTo (PVector vector, CDF sender) {
     //target = vector;
     //targetReached = false;
     home = vector;
