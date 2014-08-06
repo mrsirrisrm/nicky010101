@@ -50,7 +50,11 @@ class Flock {
   
   public void allTextDraw () {
     for (Particle part : particles) {
-      part.textDraw();
+      if (part.useImage) {
+        part.imgDraw();
+      } else {
+        part.textDraw();
+      }
     }
   }
   

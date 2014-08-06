@@ -67,6 +67,9 @@ Webcam webcam;
 Minim minim;
 FreqBalance freqBalance;
 
+PImage img0;
+PImage img1;
+
 //-----------------------------------------------------------------
 
 
@@ -97,6 +100,15 @@ void setup () {
   textFont(aFont);
   textAlign(CENTER,CENTER); 
   fill(255);
+  
+  //load the stamp images  
+  String path = "../../resources/";
+  img0 = loadImage(path + "NICOLA_STEMPEL_AKTUELL_GROESSE-1_0_crop.png");
+  img1 = loadImage(path + "NICOLA_STEMPEL_AKTUELL_GROESSE-1_1_crop.png");
+  if (img0 == null || img1 == null) {
+    println("Unable to load stamp images. Check resources directory location and contents");    
+  }  
+  
   
   cdf1 = new CDF();
   cdf2 = new CDF();
@@ -160,7 +172,7 @@ void setup () {
 
 
 void draw () {
-  background(0, 0, 0);
+  background(0);
   
   //to get mic input
   //audioLevel = audioIn.level(); 

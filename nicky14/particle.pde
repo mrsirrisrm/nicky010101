@@ -17,6 +17,7 @@ class Particle {
   private PVector home;
   
   private boolean isOne;
+  public  boolean useImage = true;
   //private static final float moveByDenominator = 8;
   private static final float maxRotationSpeed = 0.06;
   //static final float maxspeed = 30;    // Maximum speed
@@ -27,7 +28,9 @@ class Particle {
   public static final float minDistanceForDontUpdateForNIterations = 2 * minDistanceForForces;
   public static final float minDistanceForForcesSquared = minDistanceForForces*minDistanceForForces;
   public static final float minDistanceForDontUpdateForNIterationsSquared = 2 * minDistanceForForcesSquared;
-  public static final int dontUpdateForNIterations = 5;
+  public static final int   dontUpdateForNIterations = 5;
+  public static final int   imgScaleBy = 5;
+  
   
   //CDF parent: who set our target
   CDF CDFParent;
@@ -111,6 +114,22 @@ class Particle {
     
     popMatrix();
   }
+  
+  public void imgDraw () {
+    pushMatrix();
+    translate( pos.x , pos.y , pos.z * zScale); 
+    rotateX(rotation.x);
+    rotateY(rotation.y);
+    rotateZ(rotation.z);               
+  
+    if (this.isOne) {
+      image(img1, 0, 0, img1.width / imgScaleBy, img1.height / imgScaleBy);
+    } else {
+      image(img0, 0, 0, img0.width / imgScaleBy, img0.height / imgScaleBy);
+    } 
+    
+    popMatrix();
+  }  
       
   // Separation
   // Method checks for nearby particles and steers away
