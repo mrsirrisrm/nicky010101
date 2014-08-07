@@ -16,7 +16,7 @@ class Particle {
   //home position
   private PVector home;
   
-  private boolean isOne;
+  public  boolean isOne;
   public  boolean useImage = true;
   //private static final float moveByDenominator = 8;
   private static final float maxRotationSpeed = 0.06;
@@ -133,12 +133,12 @@ class Particle {
       
   // Separation
   // Method checks for nearby particles and steers away
-  private PVector separate (ArrayList<Particle> particles, float[] distances) {
+  private PVector separate (ArrayList<Particle> particles, float[] distances, int nActive) {
     float desiredseparation = 50.0f;
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
     // For every boid in the system, check if it's too close
-    for (int i = 0; i < particles.size(); i++) {
+    for (int i = 0; i < nActive; i++) {
       float d = distances[i];
       // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
       if ((d > 0) && (d < desiredseparation)) {
@@ -173,11 +173,11 @@ class Particle {
   
     // Alignment
   // For every nearby boid in the system, calculate the average velocity
-  private PVector align (ArrayList<Particle> particles, float[] distances) {
+  private PVector align (ArrayList<Particle> particles, float[] distances, int nActive) {
     float neighbordist = 100;
     PVector sum = new PVector(0, 0);
     int count = 0;
-    for (int i = 0; i < particles.size(); i++) {
+    for (int i = 0; i < nActive; i++) {
       float d = distances[i];
       if ((d > 0) && (d < neighbordist)) {
         Particle other = particles.get(i);
@@ -205,11 +205,11 @@ class Particle {
   
   // Cohesion
   // For the average location (i.e. center) of all nearby boids, calculate steering vector towards that location
-  private PVector cohesion (ArrayList<Particle> particles, float[] distances) {
+  private PVector cohesion (ArrayList<Particle> particles, float[] distances, int nActive) {
     float neighbordist = 100;
     PVector sum = new PVector(0, 0);   // Start with empty vector to accumulate all locations
     int count = 0;
-    for (int i = 0; i < particles.size(); i++) {
+    for (int i = 0; i < nActive; i++) {
       float d = distances[i];
       if ((d > 0) && (d < neighbordist)) {
         Particle other = particles.get(i);
@@ -251,22 +251,12 @@ class Particle {
   
   
   
-  void runFlocking(ArrayList<Particle> particles, float[] distances) {
-    flock(particles, distances);
-    updateFromFlocking();
-  }
-
-  private void applyForce(PVector force) {
-    // We could add mass here if we want A = F / M
-    acceleration.add(force);
-  }
-
-  // We accumulate a new acceleration each time based on three rules
-  private void flock(ArrayList<Particle> particles, float[] distances) {
-    //float[] distances = getDistances(particles);
-    PVector sep = separate(particles,distances);   // Separation
-    PVector ali = align(particles,distances);      // Alignment
-    PVector coh = cohesion(particles,distances);   // Cohesion
+  void runFlocking(ArrayList<Particle> particles, float[] distances, int nActive) {
+    //flock(particles, distances, nActive);
+    
+    PVector sep = separate(particles,distances,nActive);   // Separation
+    PVector ali = align(particles,distances,nActive);      // Alignment
+    PVector coh = cohesion(particles,distances,nActive);   // Cohesion
     PVector hom = backHome();
     // Arbitrarily weight these forces
     sep.mult(separationForce);
@@ -278,10 +268,12 @@ class Particle {
     applyForce(sep);
     applyForce(ali);
     applyForce(coh);
-    applyForce(hom);
-  }
-
-  private void updateFromFlocking() {
+    applyForce(hom);    
+    
+    
+    //updateFromFlocking();
+    
+    
     // Update velocity
     velocity.add(acceleration);
     // Limit speed
@@ -290,6 +282,43 @@ class Particle {
     //rotation = velocity;
     pos.add(velocity);
     // Reset acceleration to 0 each cycle
-    acceleration.mult(0);
-  } 
+    acceleration.mult(0);    
+  }
+
+  private void applyForce(PVector force) {
+    // We could add mass here if we want A = F / M
+    acceleration.add(force);
+  }
+
+//  // We accumulate a new acceleration each time based on three rules
+//  private void flock(ArrayList<Particle> particles, float[] distances, int nActive) {
+//    //float[] distances = getDistances(particles);
+//    PVector sep = separate(particles,distances);   // Separation
+//    PVector ali = align(particles,distances);      // Alignment
+//    PVector coh = cohesion(particles,distances);   // Cohesion
+//    PVector hom = backHome();
+//    // Arbitrarily weight these forces
+//    sep.mult(separationForce);
+//    ali.mult(alignmentForce);
+//    coh.mult(cohesionForce);
+//    hom.mult(homeForce);
+//    
+//    // Add the force vectors to acceleration
+//    applyForce(sep);
+//    applyForce(ali);
+//    applyForce(coh);
+//    applyForce(hom);
+//  }
+
+//  private void updateFromFlocking() {
+//    // Update velocity
+//    velocity.add(acceleration);
+//    // Limit speed
+//    velocity.limit(maxParticleSpeed);//velocity.limit(maxspeed);
+//    //println(velocity, "    ", maxParticleSpeed);
+//    //rotation = velocity;
+//    pos.add(velocity);
+//    // Reset acceleration to 0 each cycle
+//    acceleration.mult(0);
+//  } 
 } 

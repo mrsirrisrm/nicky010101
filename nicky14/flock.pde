@@ -1,11 +1,11 @@
 class Flock { 
 
-  private ArrayList<Particle> particles; //somehow this is being called from outside class?
-  //private PVector[] vectorsToAdd = new PVector[10];
+  private ArrayList<Particle> particles;
   private ArrayList<float[]> distances;
   private ArrayList<int[]> nextUpdateIn;
+  public  int nActive;
   
-  Flock (int numParticles) {
+  Flock (int numParticles, CDF cdf) {
     particles = new ArrayList<Particle>(numParticles);
     distances = new ArrayList<float[]>(numParticles);
     nextUpdateIn = new ArrayList<int[]>(numParticles);
@@ -13,12 +13,28 @@ class Flock {
       particles.add( new Particle(new PVector(0.0 , 0.0 , 0.0)) );
       distances.add( new float[numParticles] );
       nextUpdateIn.add( new int[numParticles] ); //default 0
-    }  
+    } 
+    particles.get(0).isOne = false;
+    particles.get(1).isOne = true;
+    nActive = numParticles;
+    moveAllItemsFromImageCDF(cdf);
+    vectorAllItemsFromImageCDF(cdf);
+  }
+  
+  public void setNumActiveParticles (int n) {
+    if (n < 2) {
+      nActive = 2;
+    } else if (n > particles.size()) {
+      nActive = particles.size();
+    } else {
+      nActive = n;
+    }
+    //println("setting n active particles: ", nActive);
   }
   
   public void changeNCDF (int N, CDF cdf) {
     int n = 0;
-    for (Particle part : particles) {
+    for (Particle part : particles.subList(0,nActive)) {
       if (n < N) {
         if (part.CDFParent != cdf) {
           flock.vectorParticleFromCDF( part, cdf );
@@ -31,7 +47,7 @@ class Flock {
   
   public int numberInCDF (CDF cdf) {
     int n = 0;
-    for (Particle part : particles) {
+    for (Particle part : particles.subList(0,nActive)) {
       if (part.CDFParent == cdf) {
         n++;        
       }
@@ -49,7 +65,7 @@ class Flock {
   } 
   
   public void allTextDraw () {
-    for (Particle part : particles) {
+    for (Particle part : particles.subList(0,nActive)) {
       if (part.useImage) {
         part.imgDraw();
       } else {
@@ -61,26 +77,26 @@ class Flock {
   public void allRunFlocking () {
     calcAllDistances ();
     //for (Particle part : particles) {
-    for (int i = 0; i < particles.size(); i++ ) {
+    for (int i = 0; i < nActive; i++ ) {
       Particle part = particles.get(i);  
-      part.runFlocking(particles,distances.get(i));
+      part.runFlocking(particles, distances.get(i), nActive);
     }
   }
 
   public void allIterate () {
-    for (Particle part : particles) {
+    for (Particle part : particles.subList(0,nActive)) {
       part.iterate();
     }
   }  
   
   public void addVectorToAll (PVector vector) {
-    for (Particle part : particles) {
+    for (Particle part : particles.subList(0,nActive)) {
       part.home.add(vector); 
     } 
   }
   
   public void moveAllItemsFromImageCDF (CDF cdf) {
-    for (Particle part : particles) {
+    for (Particle part : particles.subList(0,nActive)) {
       moveParticleFromImageCDF(part, cdf);   
     }   
   }  
@@ -91,7 +107,7 @@ class Flock {
   }
   
   public void vectorAllItemsFromImageCDF (CDF cdf) {
-    for (Particle part : flock.particles) {
+    for (Particle part : particles.subList(0,nActive)) {
       if (part.CDFParent == cdf) {
         vectorParticleFromCDF( part, cdf );  
       } 
@@ -104,13 +120,18 @@ class Flock {
   }  
   
   private void calcAllDistances () {
-    for (int i = 0; i < particles.size(); i++ ) {
+    for (int i = 0; i < nActive; i++ ) {
       Particle part = particles.get(i);
       distances.get(i)[i] = 0; //self
       
       //loop for each other particle
       otherParticleLoop:
-      for (int j = i + 1; j < particles.size(); j++ ) {
+      for (int j = i + 1; j < nActive; j++ ) {       
+        
+        if (j >= nActive) {
+          println(i, 'i' );
+          println(j, 'j' );
+        }
         if (nextUpdateIn.get(i)[j] > 0) {
           nextUpdateIn.get(i)[j]--;          
         } else {

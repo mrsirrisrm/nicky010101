@@ -18,7 +18,7 @@ ControlFrame cf;
 
 MidiInput midiInput;
 
-int numParticles = 1000;
+int numParticles = 2000;
 //ArrayList<Particle> particles;
 Flock flock;
 
@@ -35,10 +35,6 @@ boolean iterating = true;
 boolean flocking = true;
 boolean showInfo = false;
 OnscreenInfo onscreenInfo;
-
-//boolean volToSeparation = false;
-//boolean volToAlignment = false;
-//boolean volToCohesion = false;
 
 boolean volToSpeedReversed = false;
 float maxParticleSpeed = 30.0;
@@ -75,12 +71,10 @@ PImage img1;
 
 void resetVariables () {
   cameraDist = 500;
-  //dissolveProbability = 0.0;
   YRotationSpeed = 0.025;
   timeYRotation = 0.0;
   controlXRotation = 0.0;
   controlYRotation = 0.0;
-  //fadeSpeed = 20.0;
   zScale = 0.5;  
 }
 
@@ -128,12 +122,13 @@ void setup () {
   midiInput = new MidiInput(this);
   
   midiInput.plugControllerToControlFrameSlider(0,cf.slAudioThreshold);
-  midiInput.plugControllerToControlFrameSlider(1,cf.slMaxSpeed);
+  midiInput.plugControllerToControlFrameSlider(1,cf.slNumActiveParticles);
   midiInput.plugControllerToControlFrameSlider(2,cf.slAudioSplitFreq);
   midiInput.plugControllerToControlFrameSlider(3,cf.slSeparationForce);
   midiInput.plugControllerToControlFrameSlider(4,cf.slAlignmentForce);
   midiInput.plugControllerToControlFrameSlider(5,cf.slCohesionForce);
   midiInput.plugControllerToControlFrameSlider(6,cf.slHomeForce);
+  midiInput.plugControllerToControlFrameSlider(7,cf.slNumberInCDF2);
 
   //setup inputs
   //audioIn = new AudioIn(this);
@@ -148,14 +143,7 @@ void setup () {
   onscreenInfo = new OnscreenInfo();
   
   //make the flock
-  flock = new Flock(numParticles);
-  
-  //cdf1.moveAllItems ();
-  for (Particle part : flock.particles) {
-    part.CDFParent = cdf1;
-  }
-  flock.moveAllItemsFromImageCDF( cdf1 );
-  flock.vectorAllItemsFromImageCDF( cdf1 );
+  flock = new Flock(numParticles, cdf1 );
   
   println("width " , width);
   println("height ", height);
@@ -259,6 +247,9 @@ void draw () {
       videoPNGCount++;
     }
   } 
+  
+  //show the main PApplet framerate on the control frame, with a little bit of averaging
+  cf.mainFrameRate = 0.75*cf.mainFrameRate + 0.25*frameRate;
 }
 
 //capture midi messages and send to midiInput object

@@ -16,8 +16,9 @@ ControlFrame addControlFrame(String theName, int theWidth, int theHeight) {
 // are creating a new processing applet inside a
 // new frame with a controlP5 object loaded
 public class ControlFrame extends PApplet {
-  int w, h;
-  int updateAudioFeedbackOnNthFrame = 5;
+  private int w, h;
+  private int updateAudioFeedbackOnNthFrame = 5;
+  public  float mainFrameRate = 0.0;
   
   //private final static float rotateOnKeypressByRadians = 0.1;
   private final static float rotateFactor = 0.02;
@@ -28,7 +29,7 @@ public class ControlFrame extends PApplet {
   private ArrayList<Float> zoomMoves = new ArrayList<Float>();  
  
   Slider slYRotation;
-  Slider numberInCDF2;
+  Slider slNumberInCDF2;
   Slider slAudioSplitFreq;
   Slider slAudioThreshold;
   Slider slMaxSpeed; 
@@ -37,6 +38,7 @@ public class ControlFrame extends PApplet {
   Slider slAlignmentForce;
   Slider slCohesionForce;
   Slider slHomeForce;
+  Slider slNumActiveParticles;
   
   CheckBox cbRotating;
   CheckBox cbIterating;
@@ -140,7 +142,7 @@ public class ControlFrame extends PApplet {
                   .setPosition(10,130)
                   .setValue(0.025);
     
-    numberInCDF2 = cp5.addSlider("CDF2 particles")
+    slNumberInCDF2 = cp5.addSlider("CDF2 particles")
                   .setRange(0, 1.0)
                   .setPosition(10,370)
                   .setSize(300,10)
@@ -155,7 +157,10 @@ public class ControlFrame extends PApplet {
                   .plugTo(parent,"audioThreshold" )
                   .setPosition(10,410)
                   .setSize(300,10)
-                  .setValue(0.03);
+                  .setValue(0.03)
+                  .setColorBackground(color(0,100,0))
+                  .setColorActive(color(0,200,0))
+                  .setColorForeground(color(0,200,0));
     
     //checkboxes controll item general behaviours
       cbRotating = cp5.addCheckBox("cbRotating")
@@ -226,6 +231,14 @@ public class ControlFrame extends PApplet {
                 .setPosition(10,350)
                 .setSize(300,10)
                 .setValue(2.0);  
+    slNumActiveParticles = cp5.addSlider("activeParticles"  )
+                .setRange(0.0, numParticles)
+                .setPosition(10,430)
+                .setSize(300,10)
+                .setValue(numParticles)
+                .setColorBackground(color(100,0,0))
+                .setColorActive(color(200,0,0))
+                .setColorForeground(color(200,0,0));                
                 
 //   //force checkbuttons
 //      cbVolToSeparation = cp5.addCheckBox("cbVolToSeparation")
@@ -252,7 +265,7 @@ public class ControlFrame extends PApplet {
                
           
      //view control buttons  
-    int moveButtonsDown = 90;   
+    int moveButtonsDown = 110;   
      btXPLus100 = cp5.addButton("x+") //move to current screen right (may not be +x!) 
        .setValue(100)
        .setPosition(90,370 + moveButtonsDown)
@@ -331,8 +344,8 @@ public class ControlFrame extends PApplet {
     }
     slYRotation.setValue(controlYRotation % (2*PI));
 
-    float portionInCDF2 = float(flock.numberInCDF(cdf2)) / float(flock.particles.size());
-    numberInCDF2.setValue(portionInCDF2);
+    float portionInCDF2 = float(flock.numberInCDF(cdf2)) / float(flock.nActive);
+    slNumberInCDF2.setValue(portionInCDF2);
 
     //slAudioSplitFreq.setValue( AudioSplitFreq );    
   }
@@ -395,7 +408,10 @@ public class ControlFrame extends PApplet {
     if (frameCount % updateAudioFeedbackOnNthFrame == 0) {
       //draw the audio feedback cues
       
-      background(40);    
+      background(40);  
+    
+      text("Framerate: " + str(round(mainFrameRate)), 20, height - 50);
+      
 //      float maxVerticalBarLength = 200;
 //      float low = freqBalance.prevLowLev * maxVerticalBarLength;
 //      rect( 0 , 
@@ -579,12 +595,12 @@ public class ControlFrame extends PApplet {
 //      flock.changeNCDF( 50 , cdf1 );
 //    }
     
-    if (theEvent.isFrom( numberInCDF2 )) {
-      int targetNumberCDF2 = round(numberInCDF2.getValue() * flock.particles.size());
+    if (theEvent.isFrom( slNumberInCDF2 )) {
+      int targetNumberCDF2 = round(slNumberInCDF2.getValue() * flock.nActive);
       if ( targetNumberCDF2 > flock.numberInCDF(cdf2 )) {
         flock.makeNInCDF( targetNumberCDF2 , cdf2 );
       } else {
-        flock.makeNInCDF( flock.particles.size() - targetNumberCDF2 , cdf1 );
+        flock.makeNInCDF( flock.nActive - targetNumberCDF2 , cdf1 );
       }
     }
     
@@ -595,12 +611,16 @@ public class ControlFrame extends PApplet {
 //    if (theEvent.isFrom( slAudioThreshold )) {
 //      audioThreshold = slAudioThreshold.getValue();
 //    }
+
+    if (theEvent.isFrom( slNumActiveParticles )) {
+      flock.setNumActiveParticles( round(slNumActiveParticles.getValue()) );
+    }
     
   }
    
    private void sendAllToCDFWithImage (CDF cdf, String filename) {
      cdf.setupPDF2DFromImageFile(filename);
-     flock.changeNCDF( flock.particles.size(), cdf );
+     flock.changeNCDF( flock.nActive, cdf );
      flock.vectorAllItemsFromImageCDF ( cdf );
    }
    
