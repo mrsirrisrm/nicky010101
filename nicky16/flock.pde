@@ -7,7 +7,7 @@ class Flock {
   
   //private SquareRoot squareRoot = new SquareRoot();
   
-  Flock (int numParticles, CDF cdf) {
+  Flock (int numParticles, int aNActive, CDF cdf) {
     particles = new ArrayList<Particle>(numParticles);
     distances = new ArrayList<float[]>(numParticles);
     nextUpdateIn = new ArrayList<int[]>(numParticles);
@@ -18,7 +18,7 @@ class Flock {
     } 
     particles.get(0).isOne = false;
     particles.get(1).isOne = true;
-    nActive = numParticles;
+    nActive = aNActive;
     moveAllItemsFromImageCDF(cdf);
     vectorAllItemsFromImageCDF(cdf);
   }
@@ -194,5 +194,9 @@ class Flock {
         }
       }
     }
+  }
+  
+  public int maxParticles() {
+    return particles.size();
   }
 }
