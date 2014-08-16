@@ -48,13 +48,8 @@ public class ControlFrame extends PApplet {
   
   CheckBox cbRotating;
   CheckBox cbIterating;
-  //CheckBox cbChangingShapes;
   CheckBox cbFlocking;
   CheckBox cbShowInfo;
-
-  //CheckBox cbVolToSeparation;
-  //CheckBox cbVolToAlignment;
-  //CheckBox cbVolToCohesion;
   
   Button btXPLus100;
   Button btXMinus100;
@@ -145,33 +140,39 @@ public class ControlFrame extends PApplet {
                   .setColorForeground(color(200,0,0)); 
     slNumberInCDF2 = cp5.addSlider("CDF2 particles")
                   .setRange(0, 1.0)
-                  .setPosition(10,370)
+                  .setPosition(10,150)
                   .setSize(300,10)
-                  .setValue(0.0); 
+                  .setValue(0.0)
+                  .setColorBackground(color(100,0,0))
+                  .setColorActive(color(200,0,0))
+                  .setColorForeground(color(200,0,0)); 
     slAudioSplitFreq = cp5.addSlider("Split frequency")
                   .setRange(60.0, 5000.0)
-                  .setPosition(10,390)
+                  .setPosition(10,170)
                   .setSize(300,10)
-                  .setValue(800.0);
+                  .setValue(800.0)
+                  .setColorBackground(color(100,0,0))
+                  .setColorActive(color(200,0,0))
+                  .setColorForeground(color(200,0,0));
     slAudioThreshold = cp5.addSlider("Audio threshold")
                   .setRange(0.001, 0.06)
                   .plugTo(parent,"audioThreshold" )
-                  .setPosition(10,410)
+                  .setPosition(10,370)
                   .setSize(300,10)
-                  .setValue(0.03)
-                  .setColorBackground(color(0,100,0))
-                  .setColorActive(color(0,200,0))
-                  .setColorForeground(color(0,200,0));
+                  .setValue(0.03);
     slSpeedAudioComparison = cp5.addSlider("particleSpeed"  )
-                .setRange(0.0 , 0.3)
-                .setPosition(10,350)
-                .setSize(300,10)
-                .setValue(0.1);  
+                 .setRange(0.0 , 0.3)
+                 .setPosition(10,350)
+                 .setSize(300,10)
+                 .setValue(0.1);  
     slNumActiveParticles = cp5.addSlider("activeParticles"  )
-                .setRange(0.0, flock.maxParticles())
-                .setPosition(10,430)
-                .setSize(300,10)
-                .setValue(flock.nActive);
+                 .setRange(0.0, flock.maxParticles())
+                 .setPosition(10,190)
+                 .setSize(300,10)
+                 .setValue(flock.nActive)
+                 .setColorBackground(color(100,0,0))
+                 .setColorActive(color(200,0,0))
+                 .setColorForeground(color(200,0,0));
                 
    //==========force sliders====================================  
     slSeparationForce = cp5.addSlider("separationForce")
@@ -211,7 +212,7 @@ public class ControlFrame extends PApplet {
                 .setSize(20, 15)
                 .addItem("rotating", 0);        
       cbIterating = cp5.addCheckBox("cbIterating")
-                .setPosition(10, 110)
+                .setPosition(430, 90)
                 .setColorForeground(color(120))
                 .setColorActive(cbCol)
                 .setColorLabel(color(255))
@@ -384,11 +385,25 @@ public class ControlFrame extends PApplet {
         line(this.width - 100,
              this.height - (pxForStartAudioLevelBar + pxForMaxAudioThreshold * slAudioThreshold.getValue() / slAudioThreshold.getMax() ),
              this.width - 20,
-             this.height - (pxForStartAudioLevelBar + pxForMaxAudioThreshold * slAudioThreshold.getValue() / slAudioThreshold.getMax() ) );      
+             this.height - (pxForStartAudioLevelBar + pxForMaxAudioThreshold * slAudioThreshold.getValue() / slAudioThreshold.getMax() ) );
+       
+       //line showing dV/dt
+       stroke(0,255,0);
+       strokeWeight(12.0);
+       strokeCap(ROUND);
+       line(this.width - 120,
+             this.height - pxForStartAudioLevelBar,
+             this.width - 120,
+             this.height - (pxForStartAudioLevelBar + 10.0 * (freqBalance.logdVdt) ) );
+       
+       //strokeWeight( 1.0 );  
+       //strokeCap(NORMAL);
+       //for (int i = 0; i < 299; i++) {
+       //  line(i + 200, 100 - freqBalance.logdVdts[i], i + 201, 100 - freqBalance.logdVdts[(i + 1)]);  
+       //}     
                      
       }
-    }
-      
+    } 
   }
   
   //private ControlFrame() {

@@ -20,9 +20,15 @@ class FreqBalance {
   Summer sum;
   float prevHighLev = 0.0, prevLowLev = 0.0;
   float mix = 0.0;
-  final float levelDecay = 0.8; 
-
+  final float levelDecay = 0.8;
   
+  private float logLev = 0.0;
+  private float prevAudioLevel = 0.0;
+  private float dLevdtSmoothed = 0.0;
+  float logdVdt = 0.0; 
+  float dLevdtSmoothFactor = 0.5; 
+  //float[] logdVdts = new float[300];
+  //int ii = 0;
   
   public FreqBalance ( PApplet parent , float splitFrequency ) {
 
@@ -70,6 +76,22 @@ class FreqBalance {
     if (prevHighLev < 0.001) { prevHighLev = 0.001; }
     
     mix = log( prevHighLev / prevLowLev );
+    
+    
+    
+    logLev = logLev * 0.66 + log(level() / 0.0001);
+    float diff = abs( logLev - prevAudioLevel );
+    if (diff == 0.0) diff = 1.0e-10;
+    dLevdtSmoothed = diff / prevAudioLevel;//dLevdtSmoothed * dLevdtSmoothFactor + diff / prevAudioLevel;
+    logdVdt = 1.0e2 * dLevdtSmoothed;
+    
+    //if (frameCount % 10 == 0) {
+    //  println( "lev", logLev, "prev", prevAudioLevel, "diff", diff, "dLev", dLevdtSmoothed, "log", logdVdt );
+    //}
+    //logdVdts[ii] = logdVdt;
+    //ii = (ii + 1) % 300;
+    
+    prevAudioLevel = logLev;
   }
   
   public void setSplitFrequency (float splitFrequency) {

@@ -32,9 +32,7 @@ float alignmentForce = 2.0;
 float cohesionForce = 2.0;
 float homeForce = 6.0;
 
-float audioLevel = 0.2;
 float audioThreshold = 0.03;
-//float AudioSplitFreq = 1200.0;
 float forceMax = 6.0;
 
 int makeNthFrameToPNG = 0; //0 for no video
@@ -156,15 +154,15 @@ void draw () {
   //println(freqBalance.level() );
   maxParticleSpeed = map(freqBalance.level() ,
                          0.0,
-                         cf.slSpeedAudioComparison.getValue(),
+                         cf.slSpeedAudioComparison.getMax() - cf.slSpeedAudioComparison.getValue(),
                          Particle.minMinSpeed,
                          Particle.maxMaxSpeed);  
   if (maxParticleSpeed > Particle.maxMaxSpeed) {
     maxParticleSpeed = Particle.maxMaxSpeed;
   }
-   
+     
   if (showInfo) {
-    onscreenInfo.showAudio(audioLevel);  
+    onscreenInfo.showAudio(freqBalance.prevAudioLevel);  
     onscreenInfo.showVideo();   
   }
    
