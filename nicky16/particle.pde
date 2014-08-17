@@ -175,7 +175,7 @@ class Particle {
   // For every nearby boid in the system, calculate the average velocity
   private PVector align (ArrayList<Particle> particles, float[] distances, int nActive) {
     float neighbordist = 100;
-    PVector sum = new PVector(0, 0);
+    PVector sum = new PVector(0, 0, 0);
     int count = 0;
     for (int i = 0; i < nActive; i++) {
       float d = distances[i];
@@ -199,7 +199,7 @@ class Particle {
       return steer;
     } 
     else {
-      return new PVector(0, 0);
+      return new PVector(0, 0, 0);
     }
   }
   
@@ -207,7 +207,7 @@ class Particle {
   // For the average location (i.e. center) of all nearby boids, calculate steering vector towards that location
   private PVector cohesion (ArrayList<Particle> particles, float[] distances, int nActive) {
     float neighbordist = 100;
-    PVector sum = new PVector(0, 0);   // Start with empty vector to accumulate all locations
+    PVector sum = new PVector(0, 0, 0);   // Start with empty vector to accumulate all locations
     int count = 0;
     for (int i = 0; i < nActive; i++) {
       float d = distances[i];
@@ -222,7 +222,7 @@ class Particle {
       return seek(sum);  // Steer towards the location
     } 
     else {
-      return new PVector(0, 0);
+      return new PVector(0, 0, 0);
     }
   }
   

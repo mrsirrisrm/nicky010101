@@ -72,7 +72,8 @@ void setup () {
   background(0);
   aFont = createFont("Times New Roman", 8, true);
   textFont(aFont);
-  textAlign(CENTER,CENTER); 
+  textAlign(CENTER,CENTER);
+ imageMode(CENTER);  
   fill(255);
   
   //load the stamp images  
