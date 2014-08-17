@@ -123,160 +123,61 @@ class Flock {
     part.vectorTo(new PVector(x , cdf.weightedRandomInt2DY( x ), cdf.randomZ()) , cdf);  
   }  
   
-//  private void calcAllDistances () {
-//    for (int i = 0; i < nActive; i++ ) {
-//      Particle part = particles.get(i);
-//      distances.get(i)[i] = 0; //self
-//      
-//      //loop for each other particle
-//      otherParticleLoop:
-//      for (int j = i + 1; j < nActive; j++ ) {       
-//        
-//        //if (j >= nActive) {
-//        //  println(i, 'i' );
-//        //  println(j, 'j' );
-//        //}
-//        
-//        if (nextUpdateIn.get(i)[j] > 0) {
-//          nextUpdateIn.get(i)[j]--;          
-//        } else {
-//          //du update
-//          Particle other = particles.get(j);
-//          float dx = abs(part.pos.x - other.pos.x);
-//          if (dx > Particle.minDistanceForDontUpdateForNIterations) {
-//            distances.get(i)[j] = highDist;
-//            distances.get(j)[i] = highDist;
-//            nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
-//            break otherParticleLoop;          
-//          } else if (dx > Particle.minDistanceForForces) {
-//            distances.get(i)[j] = highDist;
-//            distances.get(j)[i] = highDist;
-//            break otherParticleLoop;
-//          }
-//          
-//          float dy = abs(part.pos.y - other.pos.y);
-//          if (dy > Particle.minDistanceForDontUpdateForNIterations) {
-//            distances.get(i)[j] = highDist;
-//            distances.get(j)[i] = highDist;
-//            nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
-//            break otherParticleLoop;          
-//          } else if (dy > Particle.minDistanceForForces) {
-//            distances.get(i)[j] = highDist;
-//            distances.get(j)[i] = highDist;
-//            break otherParticleLoop;
-//          }
-//          
-//          float dz = abs(part.pos.z - other.pos.z);
-//          if (dz > Particle.minDistanceForDontUpdateForNIterations) {
-//            distances.get(i)[j] = highDist;
-//            distances.get(j)[i] = highDist;
-//            nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
-//            break otherParticleLoop;          
-//          } else if (dz > Particle.minDistanceForForces) {
-//            distances.get(i)[j] = highDist;
-//            distances.get(j)[i] = highDist;
-//            break otherParticleLoop;
-//          }
-//          
-//          float distSquared = (dx*dx + dy*dy + dz*dz);
-//          if (distSquared > Particle.minDistanceForDontUpdateForNIterationsSquared) {
-//            distances.get(i)[j] = highDist;
-//            distances.get(j)[i] = highDist;
-//            nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
-//            break otherParticleLoop;          
-//          } else if (distSquared > Particle.minDistanceForForcesSquared) {
-//            distances.get(i)[j] = highDist;
-//            distances.get(j)[i] = highDist;
-//            break otherParticleLoop;
-//          }
-//          //float dist = PVector.dist(part.pos, other.pos);
-//          float dist = sqrt(distSquared);
-//          //int dist = squareRoot.fastSqrt( floor(distSquared ));
-//          distances.get(i)[j] = dist;
-//          distances.get(j)[i] = dist;
-//        }
-//      }
-//    }
-//  }
-
   private void calcAllDistances () {
     for (int i = 0; i < nActive; i++ ) {
       Particle part = particles.get(i);
       distances.get(i)[i] = 0; //self
       
-      //loop for each other particle
-      //otherParticleLoop:
-      for (int j = i + 1; j < nActive; j++ ) {       
-        
-        //if (j >= nActive) {
-        //  println(i, 'i' );
-        //  println(j, 'j' );
-        //}
-        
+      for (int j = i + 1; j < nActive; j++ ) {               
         if (nextUpdateIn.get(i)[j] > 0) {
-          nextUpdateIn.get(i)[j]--;          
-        } else {
-          Particle other = particles.get(j);
-          boolean keepGoing = true;
+          nextUpdateIn.get(i)[j]--;
+          continue;          
+        } 
           
-          float dx = abs(part.pos.x - other.pos.x);
-          if (dx > Particle.minDistanceForDontUpdateForNIterations) {
-            set2Dist(i,j,highDist);
-            nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
-            //break otherParticleLoop;
-            keepGoing = false;          
-          } else if (dx > Particle.minDistanceForForces) {
-            set2Dist(i,j,highDist);
-            //break otherParticleLoop;
-            keepGoing = false;
-          }
+        Particle other = particles.get(j);
+        
+        float dx = abs(part.pos.x - other.pos.x);
+        if (dx > Particle.minDistanceForDontUpdateForNIterations) {
+          set2Dist(i,j,highDist);
+          nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
+          continue;  
+        } else if (dx > Particle.minDistanceForForces) {
+          set2Dist(i,j,highDist);
+          continue;
+        }
+        
+        float dy = abs(part.pos.y - other.pos.y);
+        if (dy > Particle.minDistanceForDontUpdateForNIterations) {
+          set2Dist(i,j,highDist);
+          nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
+          continue;  
+        } else if (dy > Particle.minDistanceForForces) {
+          set2Dist(i,j,highDist);
+          continue;
+        }
           
-          if (keepGoing) {
-            float dy = abs(part.pos.y - other.pos.y);
-            if (dy > Particle.minDistanceForDontUpdateForNIterations) {
-              set2Dist(i,j,highDist);
-              nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
-              //break otherParticleLoop;
-              keepGoing = false;          
-            } else if (dy > Particle.minDistanceForForces) {
-              set2Dist(i,j,highDist);
-              //break otherParticleLoop;
-              keepGoing = false;
-            }
+         
+        float dz = abs(part.pos.z - other.pos.z);
+        if (dz > Particle.minDistanceForDontUpdateForNIterations) {
+          set2Dist(i,j,highDist);
+          nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
+          continue;  
+        } else if (dz > Particle.minDistanceForForces) {
+          set2Dist(i,j,highDist);
+          continue;
+        }
             
-            if (keepGoing) {
-              float dz = abs(part.pos.z - other.pos.z);
-              if (dz > Particle.minDistanceForDontUpdateForNIterations) {
-                set2Dist(i,j,highDist);
-                nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
-                //break otherParticleLoop;
-                keepGoing = false;          
-              } else if (dz > Particle.minDistanceForForces) {
-                set2Dist(i,j,highDist);
-                //break otherParticleLoop;
-                keepGoing = false;
-              }
-              
-              if (keepGoing) {
-                float distSquared = (dx*dx + dy*dy + dz*dz);
-                if (distSquared > Particle.minDistanceForDontUpdateForNIterationsSquared) {
-                  set2Dist(i,j,highDist);
-                  nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
-                  //break otherParticleLoop;
-                  keepGoing = false;          
-                } else if (distSquared > Particle.minDistanceForForcesSquared) {
-                  set2Dist(i,j,highDist);
-                  //break otherParticleLoop;
-                  keepGoing = false;
-                }
-      
-                if (keepGoing) {
-                  set2Dist(i,j,sqrt(distSquared));
-                } 
-              } //dz
-            }//dy
-          }//dx
-        }//nextupdate
+        float distSquared = (dx*dx + dy*dy + dz*dz);
+        if (distSquared > Particle.minDistanceForDontUpdateForNIterationsSquared) {
+          set2Dist(i,j,highDist);
+          nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
+          continue;
+        } else if (distSquared > Particle.minDistanceForForcesSquared) {
+          set2Dist(i,j,highDist);
+          continue;
+        }
+                
+        set2Dist(i,j,sqrt(distSquared));
       }//j
     } //i
   }
