@@ -148,10 +148,10 @@ public class ControlFrame extends PApplet {
                   .setColorActive(color(200,0,0))
                   .setColorForeground(color(200,0,0)); 
     slAudioSplitFreq = cp5.addSlider("Split frequency")
-                  .setRange(60.0, 5000.0)
+                  .setRange(60.0, 5000.0) //NB reversed sense
                   .setPosition(10,170)
                   .setSize(300,10)
-                  .setValue(800.0)
+                  .setValue(4260.0) //NB we have reversed the sense of this control
                   .setColorBackground(color(100,0,0))
                   .setColorActive(color(200,0,0))
                   .setColorForeground(color(200,0,0));             
@@ -544,7 +544,7 @@ public class ControlFrame extends PApplet {
     }
     
     if (theEvent.isFrom( slAudioSplitFreq )) {
-      freqBalance.setSplitFrequency( slAudioSplitFreq.getValue() );
+      freqBalance.setSplitFrequency( getSplitFreq() );
     }
     
     if (theEvent.isFrom( slNumActiveParticles )) {
@@ -552,6 +552,10 @@ public class ControlFrame extends PApplet {
     }
     
   }
+   
+  private float getSplitFreq () {
+    return slAudioSplitFreq.getMin() + slAudioSplitFreq.getMax() - slAudioSplitFreq.getValue();
+  } 
    
    private void sendAllToCDFWithImage (CDF cdf, String filename) {
      cdf.setupPDF2DFromImageFile(filename);

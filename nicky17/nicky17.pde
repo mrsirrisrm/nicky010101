@@ -106,7 +106,7 @@ void setup () {
   
   //setup midi controller 
   midiInput = new MidiInput(this);
-  freqBalance = new FreqBalance( this, cf.slAudioSplitFreq.getValue() );
+  freqBalance = new FreqBalance( this, cf.getSplitFreq() );
   
   midiInput.plugControllerSlider(0,cf.slAudioThreshold);
   midiInput.plugControllerSlider(1,cf.slSpeedAudioComparison);
