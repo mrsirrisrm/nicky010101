@@ -36,6 +36,7 @@ float audioThreshold = 0.03;
 float dVdtSensitivity = 0.03;
 boolean dVdtToCohesion = false;
 float forceMax = 6.0;
+float flatnessSensitivity = -0.5;
 
 int makeNthFrameToPNG = 0; //0 for no video
 int videoPNGCount = 0;
@@ -143,6 +144,10 @@ void draw () {
   
   //to get mic input 
   freqBalance.update();
+  
+  if (frameCount % 5 == 0) {
+    freqBalance.updateFFT();
+  } 
   
   if (freqBalance.prevHighLev > audioThreshold || freqBalance.prevLowLev > audioThreshold ) {
     int numToMove = abs(round(freqBalance.mix * 10.0));

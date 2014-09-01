@@ -35,6 +35,8 @@ class FreqBalance {
   float dLevdtSmoothFactor = 0.5; 
   //float[] logdVdts = new float[300];
   //int ii = 0;
+  public float[] previousSpect;
+  public float[] previousFlatness = new float[400];
   
   public FreqBalance ( PApplet parent , float splitFrequency ) {
 
@@ -72,9 +74,10 @@ class FreqBalance {
     in.patch(sum);
     
     
-    inFFT = minim.getLineIn(Minim.MONO, out.bufferSize(), out.sampleRate() );
+    inFFT = minim.getLineIn(Minim.MONO, 4096 * 4, out.sampleRate() );
     fft = new FFT( inFFT.bufferSize() , inFFT.sampleRate() );
-    fft.window( fft.BLACKMAN );
+    fft.window( FFT.BLACKMAN );
+    previousSpect = new float[fft.specSize()];
   }
   
   public void update () {
@@ -107,10 +110,9 @@ class FreqBalance {
     //ii = (ii + 1) % 300;
     
     prevAudioLevel = logLev;
-    
-    fft.forward( inFFT.left );
   }
   
+ 
   public void setSplitFrequency (float splitFrequency) {
     lowFilter.setFreq( splitFrequency );  
   } 
@@ -121,5 +123,41 @@ class FreqBalance {
   
   public float level() {
     return prevHighLev + prevLowLev;
+  }
+  
+  
+  
+  
+  public void updateFFT () {
+    for (int i = 0; i < fft.specSize(); i++ ) {
+      previousSpect[i] = previousSpect[i] * 0.75 + fft.getBand(i);
+    }
+    fft.forward( inFFT.left );
+    
+    for (int i = 1; i < previousFlatness.length; i++ ) {
+      previousFlatness[i - 1] = previousFlatness[i];
+    }
+    
+    previousFlatness[previousFlatness.length - 1] = spectralFlatness();
+  }
+  
+  public float spectralFlatness() {
+    float num = 0.;
+    float den = 0.;
+    for (int i = 2; i < fft.specSize() ; i++) {
+      num += log(previousSpect[i]);
+      den += previousSpect[i];
+    }
+    num = exp(num / fft.specSize());
+    den /= fft.specSize();
+    return log(num / den);
+  }
+  
+  public float spectralFlux () {
+    float flux = 0;
+    for (int i = 2; i < fft.specSize(); i++) {
+      flux += abs(log(previousSpect[i]) - log(fft.getBand(i)));
+    }
+    return flux;
   }
 }

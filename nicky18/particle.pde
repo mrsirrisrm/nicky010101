@@ -99,6 +99,12 @@ class Particle {
 //    }
     
     //rotation velocity
+    //PVector rot = rotationVelocity;
+    //println(flatnessSensitivity * freqBalance.spectralFlatness());
+    //if ( !Double.isNaN(freqBalance.spectralFlatness()) ) {
+    //  rot.mult( flatnessSensitivity * freqBalance.spectralFlatness() );
+    //}
+    //rotation.add(rot);
     rotation.add(rotationVelocity);
   }
   

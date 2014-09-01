@@ -398,33 +398,60 @@ public class ControlFrame extends PApplet {
              this.width - 20,
              this.height - (pxForStartAudioLevelBar + pxForMaxAudioThreshold * slAudioThreshold.getValue() / slAudioThreshold.getMax() ) );
        
-       //line showing dV/dt
-       stroke(0,255,0);
-       strokeWeight(12.0);
-       strokeCap(ROUND);
-       line(this.width - 120,
+        //line showing dV/dt
+        stroke(0,255,0);
+        strokeWeight(12.0);
+        strokeCap(ROUND);
+        line(this.width - 120,
              this.height - pxForStartAudioLevelBar,
              this.width - 120,
              this.height - (pxForStartAudioLevelBar + 10.0 * (freqBalance.logdVdt) ) );
        
-       //strokeWeight( 1.0 );  
-       //strokeCap(NORMAL);
-       //for (int i = 0; i < 299; i++) {
-       //  line(i + 200, 100 - freqBalance.logdVdts[i], i + 201, 100 - freqBalance.logdVdts[(i + 1)]);  
-       //}     
+        //strokeWeight( 1.0 );  
+        //strokeCap(NORMAL);
+        //for (int i = 0; i < 299; i++) {
+        //  line(i + 200, 100 - freqBalance.logdVdts[i], i + 201, 100 - freqBalance.logdVdts[(i + 1)]);  
+        //}     
        
        
-       //FFT
-       stroke(255);
-       strokeWeight( 2.0 );
-       strokeCap( NORMAL );
-       float fftScale = 10;
-       for (int i = 1; i < freqBalance.fft.specSize(); i++) {
-         line(i - 1 + 100, 
-              200 -  fftScale * log(freqBalance.fft.getBand( i - 1 )), 
-              i + 100, 
-              200 - fftScale * log(freqBalance.fft.getBand( i )));
-       }
+        //FFT
+        stroke(180);
+        strokeWeight( 1.0 );
+        strokeCap( NORMAL );
+        line(100, 200, 100 + freqBalance.previousFlatness.length, 200);
+        
+        stroke(255);
+        strokeWeight( 2.0 );
+        strokeCap( NORMAL );
+        float fftScale = 10;
+        for (int i = 1; i < freqBalance.previousFlatness.length; i++) {
+          line(i - 1 + 100, 
+               200 + fftScale * freqBalance.previousFlatness[i - 1],//log(freqBalance.previousSpect[ i - 1 ]), 
+               i + 100, 
+               200 + fftScale * freqBalance.previousFlatness[i] ); //log(freqBalance.previousSpect[ i ]));
+        }
+        
+       
+        //spectral flatness
+        text(str(freqBalance.spectralFlatness()),100,100);
+        stroke(0,180,230);
+        strokeWeight(12.0);
+        strokeCap(ROUND);
+        line(this.width - 160,
+            this.height - pxForStartAudioLevelBar,
+            this.width - 160,
+            this.height - (pxForStartAudioLevelBar - 80.0 * freqBalance.spectralFlatness() ) );
+        
+//        //spectral flux
+//        text(str(freqBalance.spectralFlux()),200,100);
+//        stroke(0,150,130);
+//        strokeWeight(12.0);
+//        strokeCap(ROUND);
+//        line(this.width - 200,
+//             this.height - pxForStartAudioLevelBar,
+//             this.width - 200,
+//             this.height - (pxForStartAudioLevelBar + 0.1 * freqBalance.spectralFlux() ) );
+       
                      
       }
     } 
