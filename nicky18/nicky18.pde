@@ -36,15 +36,15 @@ float audioThreshold = 0.03;
 float dVdtSensitivity = 0.03;
 boolean dVdtToCohesion = false;
 float forceMax = 6.0;
-float flatnessSensitivity = -0.5;
+float peakinessSensitivity = 0.1;
+boolean peakinessSense = false;
 
 int makeNthFrameToPNG = 0; //0 for no video
 int videoPNGCount = 0;
 
 Webcam webcam;
-//AudioIn audioIn;
-
 FreqBalance freqBalance;
+FFTAnalysis fft;
 
 PImage img0;
 PImage img1;
@@ -108,6 +108,7 @@ void setup () {
   //setup midi controller 
   midiInput = new MidiInput(this);
   freqBalance = new FreqBalance( this, cf.getSplitFreq() );
+  fft = new FFTAnalysis( this );
   
   midiInput.plugControllerSlider(0,cf.slAudioThreshold);
   midiInput.plugControllerSlider(1,cf.slSpeedAudioComparison);
@@ -122,6 +123,7 @@ void setup () {
   midiInput.plugControllerKnob(17,cf.slNumActiveParticles);
   midiInput.plugControllerKnob(18,cf.slAudioSplitFreq);
   midiInput.plugControllerKnob(19,cf.sldVdtSensitivity);
+  midiInput.plugControllerKnob(20,cf.slSpectralPeakinessSensitivity);
   midiInput.plugControllerKnob(23,cf.slNumberInCDF2);
 
   println("width " , width);
@@ -145,9 +147,9 @@ void draw () {
   //to get mic input 
   freqBalance.update();
   
-  if (frameCount % 5 == 0) {
-    freqBalance.updateFFT();
-  } 
+  if (frameCount % FFTAnalysis.updatePerFrames == 0) {
+    fft.update();
+  }  
   
   if (freqBalance.prevHighLev > audioThreshold || freqBalance.prevLowLev > audioThreshold ) {
     int numToMove = abs(round(freqBalance.mix * 10.0));
@@ -216,6 +218,13 @@ void draw () {
 //capture midi messages and send to midiInput object
 void controllerChange(int channel, int number, int value) {
   midiInput.controllerChange(channel,number,value);
+}
+
+void stop()
+{
+  freqBalance.close();
+  fft.close(); 
+  super.stop();
 }
 
 void play () {

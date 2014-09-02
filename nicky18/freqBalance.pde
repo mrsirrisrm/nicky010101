@@ -8,35 +8,26 @@ import ddf.minim.effects.*;
 import ddf.minim.ugens.*;
 import ddf.minim.spi.*; // for AudioStream
 
-import ddf.minim.analysis.*;
-
 class FreqBalance {
   private Minim minim;
   private AudioOutput out;
-  LiveInput in;
-  IIRFilter lowFilter;
-  Multiplier invert;
-  EnvelopeFollower loEnv;
-  EnvelopeFollower highEnv;
-  Sink sink;
-  Summer sum;
-  
-  AudioInput inFFT;
-  FFT fft;
-  
-  float prevHighLev = 0.0, prevLowLev = 0.0;
-  float mix = 0.0;
-  final float levelDecay = 0.8;
+  private LiveInput in;
+  private IIRFilter lowFilter;
+  private Multiplier invert;
+  private EnvelopeFollower loEnv;
+  private EnvelopeFollower highEnv;
+  private Sink sink;
+  //private Summer sum;
+    
+  public float prevHighLev = 0.0, prevLowLev = 0.0;
+  public float mix = 0.0;
+  private final float levelDecay = 0.8;
   
   private float logLev = 0.0;
   private float prevAudioLevel = 100.;
   private float dLevdtSmoothed = 0.0;
-  float logdVdt = 0.00001; 
-  float dLevdtSmoothFactor = 0.5; 
-  //float[] logdVdts = new float[300];
-  //int ii = 0;
-  public float[] previousSpect;
-  public float[] previousFlatness = new float[400];
+  public float logdVdt = 0.00001; 
+  //private float dLevdtSmoothFactor = 0.5; 
   
   public FreqBalance ( PApplet parent , float splitFrequency ) {
 
@@ -53,7 +44,7 @@ class FreqBalance {
     // construct a LiveInput by giving it an InputStream from minim.                                                  
     in = new LiveInput( inputStream );
   
-    lowFilter = new LowPassFS(splitFrequency, out.sampleRate());
+    lowFilter = new LowPassFS(splitFrequency, in.sampleRate());
     invert = new Multiplier(-1.0f);
     
     sink = new Sink();
@@ -71,13 +62,13 @@ class FreqBalance {
                               
     in.patch(lowFilter).patch(loEnv).patch(sink).patch(out);
     lowFilter.patch(invert).patch(sum).patch(highEnv).patch(sink);
-    in.patch(sum);
-    
-    
-    inFFT = minim.getLineIn(Minim.MONO, 4096 * 4, out.sampleRate() );
-    fft = new FFT( inFFT.bufferSize() , inFFT.sampleRate() );
-    fft.window( FFT.BLACKMAN );
-    previousSpect = new float[fft.specSize()];
+    in.patch(sum);    
+  }
+  
+  public void close() {
+    in.close();
+    out.close();
+    minim.stop();
   }
   
   public void update () {
@@ -123,41 +114,5 @@ class FreqBalance {
   
   public float level() {
     return prevHighLev + prevLowLev;
-  }
-  
-  
-  
-  
-  public void updateFFT () {
-    for (int i = 0; i < fft.specSize(); i++ ) {
-      previousSpect[i] = previousSpect[i] * 0.75 + fft.getBand(i);
-    }
-    fft.forward( inFFT.left );
-    
-    for (int i = 1; i < previousFlatness.length; i++ ) {
-      previousFlatness[i - 1] = previousFlatness[i];
-    }
-    
-    previousFlatness[previousFlatness.length - 1] = spectralFlatness();
-  }
-  
-  public float spectralFlatness() {
-    float num = 0.;
-    float den = 0.;
-    for (int i = 2; i < fft.specSize() ; i++) {
-      num += log(previousSpect[i]);
-      den += previousSpect[i];
-    }
-    num = exp(num / fft.specSize());
-    den /= fft.specSize();
-    return log(num / den);
-  }
-  
-  public float spectralFlux () {
-    float flux = 0;
-    for (int i = 2; i < fft.specSize(); i++) {
-      flux += abs(log(previousSpect[i]) - log(fft.getBand(i)));
-    }
-    return flux;
   }
 }

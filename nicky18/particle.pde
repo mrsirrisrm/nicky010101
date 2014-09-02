@@ -74,37 +74,6 @@ class Particle {
   }
   
   public void iterate () {
- 
-//    if (!targetReached) {    
-//      //move position towards target
-//      if (pos.x != target.x) {
-//        //velocity.x = (target.x - pos.x) / moveByDenominator; 
-//        pos.x += (target.x - pos.x) / moveByDenominator; 
-//      }
-//      if (pos.y != target.y) {
-//        //velocity.y = (target.y - pos.y) / moveByDenominator;
-//        pos.y += (target.y - pos.y) / moveByDenominator;  
-//      }
-//      if (pos.z != target.z) {
-//        //velocity.z = (target.z - pos.z) / moveByDenominator;
-//        pos.z += velocity.z = (target.z - pos.z) / moveByDenominator;  
-//      }
-//      
-//      //once we get close enough to the target, stop trying to go to target
-//      if (abs(pos.x - target.x) < targetRadius && 
-//          abs(pos.y - target.y) < targetRadius && 
-//          abs(pos.z - target.z) < targetRadius) {
-//        targetReached = true;
-//      }
-//    }
-    
-    //rotation velocity
-    //PVector rot = rotationVelocity;
-    //println(flatnessSensitivity * freqBalance.spectralFlatness());
-    //if ( !Double.isNaN(freqBalance.spectralFlatness()) ) {
-    //  rot.mult( flatnessSensitivity * freqBalance.spectralFlatness() );
-    //}
-    //rotation.add(rot);
     rotation.add(rotationVelocity);
   }
   
@@ -270,13 +239,26 @@ class Particle {
     if (!dVdtToCohesion) {
       sepForce += dVdtSensitivity * freqBalance.logdVdt;
     }
+    if (!peakinessSense) {
+      sepForce += peakinessSensitivity * fft.previousPeakiness[0];
+    }
     sep.mult(sepForce);
-    ali.mult(alignmentForce);
+    
+    float aliForce = alignmentForce;
+    if (peakinessSense) {
+      aliForce += peakinessSensitivity * fft.previousPeakiness[0];
+    }
+    ali.mult(aliForce);
+    
     float cohForce = cohesionForce;
     if (dVdtToCohesion) {
       cohForce += dVdtSensitivity * freqBalance.logdVdt;
     }
+    if (peakinessSense) {
+      cohForce += peakinessSensitivity * fft.previousPeakiness[0];
+    }    
     coh.mult(cohForce);
+    
     hom.mult(homeForce);
     
     // Add the force vectors to acceleration
@@ -290,6 +272,7 @@ class Particle {
     // Limit speed
     float mxSpeed = maxParticleSpeed;
     mxSpeed += dVdtSensitivity * freqBalance.logdVdt;
+    mxSpeed += peakinessSensitivity * fft.previousPeakiness[0];
     velocity.limit(mxSpeed);
     pos.add(velocity);
     acceleration.mult(0); // Reset acceleration to 0 each cycle    
