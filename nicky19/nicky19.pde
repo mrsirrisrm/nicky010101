@@ -33,10 +33,11 @@ float cohesionForce = 2.0;
 float homeForce = 6.0;
 
 float audioThreshold = 0.03;
-float dVdtSensitivity = 0.03;
+float dVdtSensitivity = 3.0;
 boolean dVdtToCohesion = false;
+boolean dVdtToParticleXVelocity = true;
 float forceMax = 6.0;
-float peakinessSensitivity = 0.1;
+float peakinessSensitivity = 0.5;
 boolean peakinessSense = false;
 boolean peakinessToParticleYVelocity = true;
 
@@ -143,8 +144,7 @@ void setup () {
 
 void draw () {
   background(0);
-  
-  
+    
   //to get mic input 
   freqBalance.update();
   

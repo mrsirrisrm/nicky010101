@@ -76,15 +76,15 @@ class Particle {
   public void iterate () {
     //rotation.add(rotationVelocity);
     PVector rotVel = new PVector(rotationVelocity.x,rotationVelocity.y,rotationVelocity.z);
-    if (random(10000) < 1) { 
-    //  println(fft.previousPeakiness[0]);
-      println(freqBalance.logLev);
-    }
+    //if (random(10000) < 1) { 
+      //println(fft.previousPeakiness[0]);
+      //println(freqBalance.logLev);
+    //}
     if (fft.previousPeakiness[0] > 0) {
-      rotVel.mult( 40.0 / fft.previousPeakiness[0] / fft.previousPeakiness[0] );
+      rotVel.mult( 30.0 / fft.previousPeakiness[0] / fft.previousPeakiness[0] );
     }
     if (freqBalance.logLev > 0) {
-      rotVel.mult(freqBalance.logLev * freqBalance.logLev / 200.0);
+      rotVel.mult(freqBalance.logLev * freqBalance.logLev / 300.0);
     }
     rotation.add( rotVel );
   }
@@ -287,12 +287,18 @@ class Particle {
     mxSpeed += peakinessSensitivity * fft.previousPeakiness[0];
     velocity.limit(mxSpeed);
     
-    if (peakinessToParticleYVelocity) {
-      pos.add(new PVector(velocity.x, velocity.y * fft.previousPeakiness[0] / 8.0, velocity.z));
-    } else {
-      pos.add(velocity);
+    PVector tmpVelocity = new PVector(velocity.x, velocity.y, velocity.z);
+    if (dVdtToParticleXVelocity) {
+      tmpVelocity.x *= dVdtSensitivity * freqBalance.dLevdtSmoothed * 2.0; 
     }
-    acceleration.mult(0); // Reset acceleration to 0 each cycle    
+    if (peakinessToParticleYVelocity) {
+      tmpVelocity.y *= peakinessSensitivity * fft.previousPeakiness[0] * 0.25;
+    } 
+    pos.add(tmpVelocity);
+    
+    acceleration.x = 0;
+    acceleration.y = 0;
+    acceleration.z = 0;
   }
 
   private void applyForce(PVector force) {

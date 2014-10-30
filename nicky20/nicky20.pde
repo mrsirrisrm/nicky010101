@@ -1,70 +1,53 @@
 Flock flock;
-
 ControlFrame cf;
 MidiInput midiInput;
-
-
-int thisFrameForChangingShapes = 0;
-float cameraDist;
-
 CDF cdf1, cdf2;
+FreqBalance freqBalance;
+FFTAnalysis fft;
 
-PFont aFont;
+float cameraDist;
+//PFont aFont;
 
-//boolean changingShapes = false;
-boolean rotating = false;
 boolean iterating = true;
 boolean flocking = true;
 boolean showInfo = false;
-OnscreenInfo onscreenInfo;
 
-boolean volToSpeedReversed = false;
+//boolean volToSpeedReversed = false;
 float maxParticleSpeed = 30.0;
 
-float YRotationSpeed;
-float timeYRotation;
-float controlXRotation;
-float controlYRotation;
 float zScale;
 
-float separationForce = 3.0; 
+float separationForce = 2.2; 
 float alignmentForce = 2.0;    
 float cohesionForce = 2.0;
 float homeForce = 6.0;
 
-float audioThreshold = 0.03;
-float dVdtSensitivity = 0.03;
+float audioThreshold = 0.02;
+float dVdtSensitivity = 3.0;
 boolean dVdtToCohesion = false;
-float forceMax = 6.0;
-float peakinessSensitivity = 0.1;
+boolean dVdtToParticleXVelocity = true;
+float forceMax = 4.5;
+float peakinessSensitivity = 0.5;
 boolean peakinessSense = false;
 boolean peakinessToParticleYVelocity = true;
+float moveParticlesBetweenCDFSensitivity = 6.0;
 
 int makeNthFrameToPNG = 0; //0 for no video
 int videoPNGCount = 0;
 
-Webcam webcam;
-FreqBalance freqBalance;
-FFTAnalysis fft;
-
+//stamp images
 PImage img0;
 PImage img1;
+
+boolean showPeakiness = false;
+boolean showDVDT = false;
 
 //-----------------------------------------------------------------
 
 
 void resetVariables () {
   cameraDist = 800;
-  YRotationSpeed = 0.025;
-  timeYRotation = 0.0;
-  controlXRotation = 0.0;
-  controlYRotation = 0.0;
   zScale = 0.5;  
-}
-
-
-float yRotation () {
-  return timeYRotation + controlYRotation; 
 }
 
 void setup () {  
@@ -74,8 +57,6 @@ void setup () {
   }
   smooth();
   background(0);
-  aFont = createFont("Times New Roman", 8, true);
-  textFont(aFont);
   textAlign(CENTER,CENTER);
   imageMode(CENTER);  
   fill(255);
@@ -93,13 +74,9 @@ void setup () {
   
   resetVariables();
   
-  //webcam = new Webcam(this);
-
   //set up cdf functions
   cdf1.setupPDF2DFromImageFile("heap.png");
   cdf2.setupPDF2DFromImageFile("cross.png");
-  
-  onscreenInfo = new OnscreenInfo();
   
   //make the flock
   flock = new Flock( 2000 , 1000 ,  cdf1 );
@@ -143,8 +120,7 @@ void setup () {
 
 void draw () {
   background(0);
-  
-  
+    
   //to get mic input 
   freqBalance.update();
   
@@ -152,14 +128,15 @@ void draw () {
     fft.update();
   }  
   
-  if (freqBalance.prevHighLev > audioThreshold || freqBalance.prevLowLev > audioThreshold ) {
-    int numToMove = abs(round(freqBalance.mix * 10.0));
+  if (freqBalance.prevHighLev() > audioThreshold || freqBalance.prevLowLev() > audioThreshold ) {
+    int numToMove = round(freqBalance.mix * moveParticlesBetweenCDFSensitivity);
+    cf.showNChangingCDF( numToMove );
     if (freqBalance.mix > 0 ) {
       //higher freqs dominate 
       flock.changeNCDF( numToMove , cdf2 );
     } else {
       //lower freqs dominate
-      flock.changeNCDF( numToMove , cdf1 );
+      flock.changeNCDF( -numToMove , cdf1 );
     }
   }
   
@@ -172,12 +149,7 @@ void draw () {
   if (maxParticleSpeed > Particle.maxMaxSpeed) {
     maxParticleSpeed = Particle.maxMaxSpeed;
   }
-     
-  if (showInfo) {
-    onscreenInfo.showAudio(freqBalance.prevAudioLevel);  
-    onscreenInfo.showVideo();   
-  }
-   
+        
   //drawing and flocking
   flock.allTextDraw ();
   if (flocking) {
@@ -187,18 +159,13 @@ void draw () {
     flock.allIterate(); //basically rotation
   }
   
-  //3D camera stuff  
-  if (rotating) {
-    timeYRotation += YRotationSpeed;
-  }
   cameraDist *= cf.getZoom();
-  controlYRotation = (controlYRotation + cf.getYRotation()) % (2*PI);
-
+  
   if (frameCount % 5 == 0) {  
     cf.updateSliders();
   }
   
-  camera(width/2 + cameraDist*sin(yRotation()), height/2 + cameraDist*sin(controlXRotation), cameraDist*cos(yRotation())*cos(controlXRotation), 
+  camera(width/2, height/2, cameraDist, 
           width/2, height/2, 0, 
           0.0, 1.0, 0.0);
           
