@@ -42,12 +42,12 @@ public class ControlFrame extends PApplet {
   Slider slAudioThreshold;
   Slider slSpeedAudioComparison; 
   
-  Slider slSeparationForce;
-  Slider slAlignmentForce;
-  Slider slCohesionForce;
+  //Slider slSeparationForce;
+  //Slider slAlignmentForce;
+  //Slider slCohesionForce;
   Slider slHomeForce;
-  Slider slNumActiveParticles;
-  Slider slZScale;
+  //Slider slNumActiveParticles;
+  //Slider slZScale;
   Slider sldVdtSensitivity;
   Slider slSpectralPeakinessSensitivity;
   
@@ -83,97 +83,105 @@ public class ControlFrame extends PApplet {
   public void setup() {
     background(40);
     
+    textSize( 10 );
+  
     color cbCol = color(2,119,168);
     size(w, h);
     frameRate(25);
     cp5 = new ControlP5(this);
+    
+    //PFont p = createFont("Verdana", 8);
+    //cp5.setControlFont(p );
 
     
     //==========knobs in red=======================================================
     int moveKnobsY = 20; 
      
-    slSpectralPeakinessSensitivity = cp5.addSlider("peakiness sensitivity")
-                  .setRange(0., 1.)
-                  .plugTo(parent,"peakinessSensitivity" )
+    //purple
+    slNumberInCDF2 = cp5.addSlider("CDF2  particles")
+                  .setRange(0, 1.0)
                   .setPosition(10,110 + moveKnobsY)
                   .setSize(300,10)
-                  .setValue(0.5)
-                  .setColorBackground(color(100,0,0))
-                  .setColorActive(color(200,0,0))
-                  .setColorForeground(color(200,0,0));
-    sldVdtSensitivity = cp5.addSlider("dVdt sensitivity")
-                  .setRange(0., 10.)
-                  .plugTo(parent,"dVdtSensitivity" )
+                  .setValue(0.0)
+                  .setColorBackground(color(80,0,80))
+                  .setColorActive(color(160,0,160))
+                  .setColorForeground(color(160,0,160)); 
+    slAudioSplitFreq = cp5.addSlider("Split  frequency")
+                  .setRange(0, 6.38) //NB reversed sense. the range is 60 hz to 5000 hz, so log2(5000 / 60) = 6.38
                   .setPosition(10,130 + moveKnobsY)
                   .setSize(300,10)
-                  .setValue(3.0)
-                  .setColorBackground(color(100,0,0))
-                  .setColorActive(color(200,0,0))
-                  .setColorForeground(color(200,0,0));     
-    slNumberInCDF2 = cp5.addSlider("CDF2 particles")
-                  .setRange(0, 1.0)
-                  .setPosition(10,150 + moveKnobsY)
-                  .setSize(300,10)
-                  .setValue(0.0)
-                  .setColorBackground(color(100,0,0))
-                  .setColorActive(color(200,0,0))
-                  .setColorForeground(color(200,0,0)); 
-    slAudioSplitFreq = cp5.addSlider("Split frequency")
-                  .setRange(0, 6.38) //NB reversed sense. the range is 60 hz to 5000 hz, so log2(5000 / 60) = 6.38
-                  .setPosition(10,170 + moveKnobsY)
-                  .setSize(300,10)
                   .setValue(2.65) //approx 800 Hz
-                  .setColorBackground(color(100,0,0))
-                  .setColorActive(color(200,0,0))
-                  .setColorForeground(color(200,0,0));             
-    slNumActiveParticles = cp5.addSlider("activeParticles"  )
-                 .setRange(0.0, flock.maxParticles())
-                 .setPosition(10,190 + moveKnobsY)
-                 .setSize(300,10)
-                 .setValue(flock.nActive)
-                 .setColorBackground(color(100,0,0))
-                 .setColorActive(color(200,0,0))
-                 .setColorForeground(color(200,0,0));
-    slZScale = cp5.addSlider("Z Scale")
-                  .plugTo(parent,"zScale")
-                  .setRange(0, 1)
+                  .setColorBackground(color(80,0,80))
+                  .setColorActive(color(160,0,160))
+                  .setColorForeground(color(160,0,160));             
+
+    //blue
+    slSpectralPeakinessSensitivity = cp5.addSlider("peakiness  sensitivity")
+                  .setRange(0., 1.)
+                  .plugTo(parent,"peakinessSensitivity" )
                   .setPosition(10,210 + moveKnobsY)
                   .setSize(300,10)
-                  .setValue(0.5)
-                  .setColorBackground(color(100,0,0))
-                  .setColorActive(color(200,0,0))
-                  .setColorForeground(color(200,0,0));               
+                  .setValue(0.5);
+    sldVdtSensitivity = cp5.addSlider("dVdt  sensitivity")
+                  .setRange(0., 10.)
+                  .plugTo(parent,"dVdtSensitivity" )
+                  .setPosition(10,230 + moveKnobsY)
+                  .setSize(300,10)
+                  .setValue(3.0);
+                  
+//    slNumActiveParticles = cp5.addSlider("activeParticles"  )
+//                 .setRange(0.0, flock.maxParticles())
+//                 .setPosition(10,190 + moveKnobsY)
+//                 .setSize(300,10)
+//                 .setValue(flock.nActive)
+//                 .setColorBackground(color(100,0,0))
+//                 .setColorActive(color(200,0,0))
+//                 .setColorForeground(color(200,0,0));
+//    slZScale = cp5.addSlider("Z Scale")
+//                  .plugTo(parent,"zScale")
+//                  .setRange(0, 1)
+//                  .setPosition(10,210 + moveKnobsY)
+//                  .setSize(300,10)
+//                  .setValue(0.5)
+//                  .setColorBackground(color(100,0,0))
+//                  .setColorActive(color(200,0,0))
+//                  .setColorForeground(color(200,0,0));               
                 
     //==========sliders in blue====================================
     int moveSlidersY = 20;
     
-    slSeparationForce = cp5.addSlider("separationForce")
-                .plugTo(parent,"separationForce")
-                .setRange(0.0, forceMax)
-                .setPosition(10,250 + moveSlidersY)
-                .setSize(300,10)
-                .setValue(2.2);
-    slAlignmentForce = cp5.addSlider("alignmentForce" )
-                .plugTo(parent,"alignmentForce" )
-                .setRange(0.0, forceMax)
-                .setPosition(10,270 + moveSlidersY)
-                .setSize(300,10)
-                .setValue(2.0);
-    slCohesionForce = cp5.addSlider("cohesionForce"  )
-                .plugTo(parent,"cohesionForce"  )
+    //red
+//    slSeparationForce = cp5.addSlider("separationForce")
+//                .plugTo(parent,"separationForce")
+//                .setRange(0.0, forceMax)
+//                .setPosition(10,250 + moveSlidersY)
+//                .setSize(300,10)
+//                .setValue(2.2);
+//    slAlignmentForce = cp5.addSlider("alignmentForce" )
+//                .plugTo(parent,"alignmentForce" )
+//                .setRange(0.0, forceMax)
+//                .setPosition(10,270 + moveSlidersY)
+//                .setSize(300,10)
+//                .setValue(2.0);
+//    slCohesionForce = cp5.addSlider("cohesionForce"  )
+//                .plugTo(parent,"cohesionForce"  )
+//                .setRange(0.0, forceMax)
+//                .setPosition(10,290 + moveSlidersY)
+//                .setSize(300,10)
+//                .setValue(2.0);
+    slHomeForce = cp5.addSlider("home  Force"  )
+                .plugTo(parent,"homeForce"  )
                 .setRange(0.0, forceMax)
                 .setPosition(10,290 + moveSlidersY)
                 .setSize(300,10)
-                .setValue(2.0);
-    slHomeForce = cp5.addSlider("homeForce"  )
-                .plugTo(parent,"homeForce"  )
-                .setRange(0.0, forceMax)
-                .setPosition(10,310 + moveSlidersY)
-                .setSize(300,10)
-                .setValue(2.0);                
+                .setValue(2.0)
+                .setColorBackground(color(100,0,0))
+                .setColorActive(color(200,0,0))
+                .setColorForeground(color(200,0,0));                
 
                 
-    slSpeedAudioComparison = cp5.addSlider("particleSpeed"  )
+    //green
+    slSpeedAudioComparison = cp5.addSlider("particle  Speed"  )
                   .setRange(0.0 , 0.3)
                   .setPosition(10,350 + moveSlidersY)
                   .setSize(300,10)
@@ -181,7 +189,7 @@ public class ControlFrame extends PApplet {
                   .setColorBackground(color(0,60,0))
                   .setColorActive(color(0,150,0))
                   .setColorForeground(color(0,150,0));
-    slAudioThreshold = cp5.addSlider("Audio threshold")
+    slAudioThreshold = cp5.addSlider("Audio  threshold")
                   .setRange(0.001, 0.06)
                   .plugTo(parent,"audioThreshold" )
                   .setPosition(10,370 + moveSlidersY)
@@ -195,36 +203,36 @@ public class ControlFrame extends PApplet {
           
     //------------checkboxes controll item general behaviours-------------------------
       cbdVdtToCohesion = cp5.addCheckBox("cbdVdtToCohesion")
-                .setPosition(430, 130 + moveKnobsY)
+                .setPosition(430, 230 + moveKnobsY)
                 .setColorForeground(color(120))
                 .setColorActive(cbCol)
                 .setColorLabel(color(255))
                 .setSize(20, 15)
                 .addItem("dVdt +-", 0);        
+      cbdVdtToParticleXVelocity = cp5.addCheckBox("cbdVdtToX")
+                .setPosition(510, 230 + moveKnobsY)
+                .setColorForeground(color(120))
+                .setColorActive(cbCol)
+                .setColorLabel(color(255))
+                .setSize(20, 15)
+                .addItem("dVdt  to  X", 0);            
       cbPeakinessSense = cp5.addCheckBox("cbPeakiness")
-                .setPosition(430, 110 + moveKnobsY)
+                .setPosition(430, 210 + moveKnobsY)
                 .setColorForeground(color(120))
                 .setColorActive(cbCol)
                 .setColorLabel(color(255))
                 .setSize(20, 15)
                 .addItem("peakiness +-", 0);   
       cbPeakinessToParticleYVelocity = cp5.addCheckBox("cbPeakinessToY")
-                .setPosition(510, 110 + moveKnobsY)
+                .setPosition(510, 210 + moveKnobsY)
                 .setColorForeground(color(120))
                 .setColorActive(cbCol)
                 .setColorLabel(color(255))
                 .setSize(20, 15)
-                .addItem("peakiness to Y", 0);    
-      cbdVdtToParticleXVelocity = cp5.addCheckBox("cbdVdtToX")
-                .setPosition(510, 130 + moveKnobsY)
-                .setColorForeground(color(120))
-                .setColorActive(cbCol)
-                .setColorLabel(color(255))
-                .setSize(20, 15)
-                .addItem("dVdt to X", 0);            
+                .addItem("peakiness  to  Y", 0);    
           
      //-----------view control buttons  -------------------------------------------
-    int moveButtonsDown = 70;   
+    int moveButtonsDown = 90;   
      btXPLus100 = cp5.addButton("x+") //move to current screen right (may not be +x!) 
        .setValue(100)
        .setPosition(90,370 + moveButtonsDown)
@@ -482,9 +490,9 @@ public class ControlFrame extends PApplet {
       freqBalance.setSplitFrequency( getSplitFreq() );
     }
     
-    if (theEvent.isFrom( slNumActiveParticles )) {
-      flock.setNumActiveParticles( round(slNumActiveParticles.getValue()) );
-    }  
+    //if (theEvent.isFrom( slNumActiveParticles )) {
+    //  flock.setNumActiveParticles( round(slNumActiveParticles.getValue()) );
+    //}  
   } //updateEvent
   
   public void updateSliders () {
@@ -521,7 +529,11 @@ public class ControlFrame extends PApplet {
    
   private float getSplitFreq () {
     // slider should range from 60 Hz to 5000 Hz , so 6.38 = log2(5000 / 60)
-    return 60.0 * ( pow(2.0, slAudioSplitFreq.getMax() - slAudioSplitFreq.getValue() ) ) ;
+    if (slAudioSplitFreq == null) {
+      return 1000;
+    } else {
+      return 60.0 * ( pow(2.0, slAudioSplitFreq.getMax() - slAudioSplitFreq.getValue() ) ) ;
+    }
   } 
    
    private void sendAllToCDFWithImage (CDF cdf, String filename) {

@@ -15,7 +15,7 @@ boolean showInfo = false;
 //boolean volToSpeedReversed = false;
 float maxParticleSpeed = 30.0;
 
-float zScale;
+float zScale = 0.5;
 
 float separationForce = 2.2; 
 float alignmentForce = 2.0;    
@@ -79,30 +79,24 @@ void setup () {
   cdf2.setupPDF2DFromImageFile("cross.png");
   
   //make the flock
-  flock = new Flock( 2000 , 1000 ,  cdf1 );
+  flock = new Flock( 1000 , 1000 ,  cdf1 );
   
-  cf = addControlFrame("control", 600, 600);
-  
-  //setup midi controller 
+  cf = addControlFrame("control", 700, 600);
+   
+  //setup midi controller
   midiInput = new MidiInput(this);
-  freqBalance = new FreqBalance( this, cf.getSplitFreq() );
-  fft = new FFTAnalysis( this );
-  
   midiInput.plugControllerSlider(0,cf.slAudioThreshold);
   midiInput.plugControllerSlider(1,cf.slSpeedAudioComparison);
-  //midiInput.plugControllerSlider(2,cf.slAudioSplitFreq);
-  midiInput.plugControllerSlider(3,cf.slSeparationForce);
-  midiInput.plugControllerSlider(4,cf.slAlignmentForce);
-  midiInput.plugControllerSlider(5,cf.slCohesionForce);
   midiInput.plugControllerSlider(6,cf.slHomeForce);
-  //midiInput.plugControllerSlider(7,cf.slNumberInCDF2);
   
-  midiInput.plugControllerKnob(16,cf.slZScale);
-  midiInput.plugControllerKnob(17,cf.slNumActiveParticles);
   midiInput.plugControllerKnob(18,cf.slAudioSplitFreq);
   midiInput.plugControllerKnob(19,cf.sldVdtSensitivity);
   midiInput.plugControllerKnob(20,cf.slSpectralPeakinessSensitivity);
   midiInput.plugControllerKnob(23,cf.slNumberInCDF2);
+
+  //audio input analysis 
+  freqBalance = new FreqBalance( this, cf.getSplitFreq() );
+  fft = new FFTAnalysis( this );
 
   println("width " , width);
   println("height ", height);
@@ -114,6 +108,15 @@ void setup () {
   println("allocated mem ", allocated/1024/1024);
   println("free mem ", free/1024/1024);
   println("maximum mem ", maximum/1024/1024);
+  
+  //wait before start drawing to give all frames a chance to initialise
+  //int m = millis();
+  //while (millis() < m + 2000) {
+  //  print("");
+  //}
+  while (cf.frameCount < 2) {
+    print("");
+  }  
 };
 
 
