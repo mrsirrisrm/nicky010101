@@ -23,13 +23,13 @@ float cohesionForce = 2.0;
 float homeForce = 6.0;
 
 float audioThreshold = 0.02;
-float dVdtSensitivity = 3.0;
-boolean dVdtToCohesion = false;
-boolean dVdtToParticleXVelocity = true;
+float dVdtSensitivity = 0.0;
+//boolean dVdtSense = false;
+boolean dVdtToParticleXVelocity = false;
 float forceMax = 4.5;
-float peakinessSensitivity = 0.5;
-boolean peakinessSense = false;
-boolean peakinessToParticleYVelocity = true;
+float peakinessSensitivity = 0.0;
+//boolean peakinessSense = false;
+boolean peakinessToParticleYVelocity = false;
 float moveParticlesBetweenCDFSensitivity = 6.0;
 
 int makeNthFrameToPNG = 0; //0 for no video
@@ -85,14 +85,19 @@ void setup () {
    
   //setup midi controller
   midiInput = new MidiInput(this);
-  midiInput.plugControllerSlider(0,cf.slAudioThreshold);
-  midiInput.plugControllerSlider(1,cf.slSpeedAudioComparison);
-  midiInput.plugControllerSlider(6,cf.slHomeForce);
+  midiInput.plugControllerSlider(0,cf.slSplitFreq);
+  midiInput.plugControllerSlider(1,cf.slSpectralPeakinessSensitivity);
+  midiInput.plugControllerSlider(2,cf.sldVdtSensitivity);
+  midiInput.plugControllerSlider(3,cf.slHomeForce);
+  midiInput.plugControllerSlider(4,cf.slParticleSpeed);
+  midiInput.plugControllerSlider(5,cf.slAudioThreshold);
   
-  midiInput.plugControllerKnob(18,cf.slAudioSplitFreq);
-  midiInput.plugControllerKnob(19,cf.sldVdtSensitivity);
-  midiInput.plugControllerKnob(20,cf.slSpectralPeakinessSensitivity);
-  midiInput.plugControllerKnob(23,cf.slNumberInCDF2);
+  midiInput.plugControllerSlider(7,cf.slNumberInCDF2); //offscreen
+  
+  //midiInput.plugControllerKnob(18,cf.slAudioSplitFreq);
+  //midiInput.plugControllerKnob(19,cf.sldVdtSensitivity);
+  //midiInput.plugControllerKnob(20,cf.slSpectralPeakinessSensitivity);
+  //midiInput.plugControllerKnob(23,cf.slNumberInCDF2);
 
   //audio input analysis 
   freqBalance = new FreqBalance( this, cf.getSplitFreq() );
@@ -144,13 +149,15 @@ void draw () {
   }
   
   //println(freqBalance.level() );
-  maxParticleSpeed = map(freqBalance.level() ,
+  maxParticleSpeed = map(freqBalance.level(),
                          0.0,
-                         cf.slSpeedAudioComparison.getMax() - cf.slSpeedAudioComparison.getValue(),
-                         Particle.minMinSpeed,
-                         Particle.maxMaxSpeed);  
-  if (maxParticleSpeed > Particle.maxMaxSpeed) {
-    maxParticleSpeed = Particle.maxMaxSpeed;
+                         1.0,
+                         cf.slParticleSpeed.getMin(),
+                         cf.slParticleSpeed.getValue());
+  //println(maxParticleSpeed);                     
+  if (maxParticleSpeed > cf.slParticleSpeed.getMax()) {
+    println("setting maxMaxSpeed ", cf.slParticleSpeed.getMax());
+    maxParticleSpeed = cf.slParticleSpeed.getMax();
   }
         
   //drawing and flocking

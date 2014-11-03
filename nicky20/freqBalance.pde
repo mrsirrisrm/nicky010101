@@ -24,7 +24,7 @@ class FreqBalance {
   private final float levelDecay = 0.8;
   
   private float logLev = 0.0;
-  private float prevAudioLevel = 100.;
+  private float prevAudioLevel = 1.;
   private float dLevdtSmoothed = 0.0;
   public float logdVdt = 0.00001; 
   //private float dLevdtSmoothFactor = 0.5; 
@@ -126,7 +126,9 @@ class FreqBalance {
   }
   
   public float level() {
-    return compressorLimiter(this.uncompressedLevel(), 14.0, 18.0, 0.33);
+    //println("ul",log(this.uncompressedLevel()));
+    float q = compressorLimiter(log(this.uncompressedLevel()), -4.0, -2.0, 0.7);
+    return map(q,-6.0,0.0,0,1);
   }
   
   public float prevLowLev() {

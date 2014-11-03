@@ -21,8 +21,8 @@ class Particle {
   //private static final float moveByDenominator = 8;
   private static final float maxRotationSpeed = 0.06;
   //static final float maxspeed = 30;    // Maximum speed
-  public  static final float maxMaxSpeed = 10.0;
-  public  static final float minMinSpeed = 0.5;
+  //public  static final float maxMaxSpeed = 10.0;
+  //public  static final float minMinSpeed = 0.5;
   private static final float maxforce = 0.2;    // Maximum steering force
   
   public static final float minDistanceForForces = 100.0;
@@ -248,26 +248,26 @@ class Particle {
     
     // Arbitrarily weight these forces
     float sepForce = separationForce;
-    if (!dVdtToCohesion) {
+    if (dVdtSensitivity > 0) {
       sepForce += dVdtSensitivity * freqBalance.logdVdt;
     }
-    if (!peakinessSense) {
+    if (peakinessSensitivity > 0) {
       sepForce += peakinessSensitivity * fft.previousPeakiness[0];
     }
     sep.mult(sepForce);
     
     float aliForce = alignmentForce;
-    if (peakinessSense) {
-      aliForce += peakinessSensitivity * fft.previousPeakiness[0];
-    }
+    //if (peakinessSensitivity < 0) {
+    //  aliForce += -peakinessSensitivity * fft.previousPeakiness[0];
+    //}
     ali.mult(aliForce);
     
     float cohForce = cohesionForce;
-    if (dVdtToCohesion) {
-      cohForce += dVdtSensitivity * freqBalance.logdVdt;
+    if (dVdtSensitivity < 0) {
+      cohForce += -dVdtSensitivity * freqBalance.logdVdt;
     }
-    if (peakinessSense) {
-      cohForce += peakinessSensitivity * fft.previousPeakiness[0];
+    if (peakinessSensitivity < 0) {
+      cohForce += -peakinessSensitivity * fft.previousPeakiness[0];
     }    
     coh.mult(cohForce);
     
