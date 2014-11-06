@@ -9,8 +9,6 @@ class FFTAnalysis {
   public float[] previousPeakiness = new float[200];
   public static final int updatePerFrames = 3;
   
-  
-  
   public FFTAnalysis ( PApplet parent ) {
     minim = new Minim(parent);
        
@@ -23,7 +21,6 @@ class FFTAnalysis {
   
   public void close() {
     in.close();
-    //out.close();
     minim.stop();
   }
   

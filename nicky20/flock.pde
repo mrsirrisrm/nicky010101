@@ -41,7 +41,7 @@ class Flock {
     for (Particle part : particles.subList(0,nActive)) {
       if (n < N) {
         if (part.CDFParent != cdf) {
-          flock.vectorParticleFromCDF( part, cdf );
+          this.vectorParticleFromCDF( part, cdf );
           //println(n,"   ",part);
           n++;        
         }
@@ -78,18 +78,18 @@ class Flock {
     }
   }
   
-  public void allRunFlocking () {
+  public void allRunFlocking (InputData inputData) { //float logdVdt,float adVdtSensitivity,float peakiness,float aPeakinessSensitivity,float dLevdtSmoothed,boolean adVdtToParticleXVelocity,boolean aPeakinessToParticleYVelocity) {
     calcAllDistances ();
     //for (Particle part : particles) {
     for (int i = 0; i < nActive; i++ ) {
       Particle part = particles.get(i);  
-      part.runFlocking(particles, distances.get(i), nActive);
+      part.runFlocking(particles,distances.get(i),nActive,inputData);
     }
   }
 
-  public void allIterate () {
+  public void allRotate (InputData inputData) {
     for (Particle part : particles.subList(0,nActive)) {
-      part.iterate();
+      part.rotateIt(inputData);
     }
   }  
   
@@ -189,5 +189,26 @@ class Flock {
   
   public int maxParticles() {
     return particles.size();
+  }
+  
+  public int runInputStep(InputData input) {
+    int numToMove = 0;
+    if (input.prevHighLev > input.audioThreshold || input.prevLowLev > input.audioThreshold ) {
+      numToMove = round(input.mix * moveParticlesBetweenCDFSensitivity);
+      if (input.mix > 0 ) {
+        //higher freqs dominate 
+        this.changeNCDF( numToMove , cdf2 );
+      } else {
+        //lower freqs dominate
+        this.changeNCDF( -numToMove , cdf1 );
+      }
+    }
+    
+    this.allTextDraw();
+    this.allRunFlocking(input);//freqBalance.logdVdt,dVdtSensitivity,fft.previousPeakiness[0],peakinessSensitivity,freqBalance.dLevdtSmoothed,dVdtToParticleXVelocity,peakinessToParticleYVelocity);
+    this.allRotate(input);//fft.previousPeakiness[0], freqBalance.logLev);
+    //println(particles.get(0));
+   
+    return numToMove; 
   }
 }

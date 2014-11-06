@@ -77,6 +77,20 @@ class MidiInput {
           myStop();
           break;
         
+        case 65:
+          if (value > 64) {
+            inputData.peakinessToParticleYVelocity = !inputData.peakinessToParticleYVelocity;
+            cf.updateCheckboxes();
+          }
+          break;
+          
+        case 66:
+          if (value > 64) {
+            inputData.dVdtToParticleXVelocity = !inputData.dVdtToParticleXVelocity;
+            cf.updateCheckboxes();
+          }
+          break;
+          
         default:
           println(number);
           break;

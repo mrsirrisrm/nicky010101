@@ -36,7 +36,6 @@ public class ControlFrame extends PApplet {
   private int nChangingCDF = 0;
   private int nChangingCDFFrameCount = 0;  
  
-  //Slider slYRotation;
   Slider slNumberInCDF2;
   Slider slSplitFreq;
   Slider slAudioThreshold;
@@ -46,13 +45,9 @@ public class ControlFrame extends PApplet {
   //Slider slAlignmentForce;
   //Slider slCohesionForce;
   Slider slHomeForce;
-  //Slider slNumActiveParticles;
-  //Slider slZScale;
   Slider sldVdtSensitivity;
   Slider slSpectralPeakinessSensitivity;
   
-  //CheckBox cbdVdtToCohesion;
-  //CheckBox cbPeakinessSense;
   CheckBox cbPeakinessToParticleYVelocity;
   CheckBox cbdVdtToParticleXVelocity;
     
@@ -67,6 +62,8 @@ public class ControlFrame extends PApplet {
   Button btCross1;
   Button btHeap2;
   Button btCross2;  
+  
+  Button btWriteMovesFile;
 
   //constructors--------------------------
   public ControlFrame(Object theParent, int theWidth, int theHeight) {
@@ -119,34 +116,14 @@ public class ControlFrame extends PApplet {
     //blue
     slSpectralPeakinessSensitivity = cp5.addSlider("peakiness  sensitivity")
                   .setRange(-1., 1.)
-                  .plugTo(parent,"peakinessSensitivity" )
                   .setPosition(10,210 + moveKnobsY)
                   .setSize(300,10)
                   .setValue(0.0);
     sldVdtSensitivity = cp5.addSlider("dVdt  sensitivity")
                   .setRange(-10., 10.)
-                  .plugTo(parent,"dVdtSensitivity" )
                   .setPosition(10,230 + moveKnobsY)
                   .setSize(300,10)
                   .setValue(0.0);
-                  
-//    slNumActiveParticles = cp5.addSlider("activeParticles"  )
-//                 .setRange(0.0, flock.maxParticles())
-//                 .setPosition(10,190 + moveKnobsY)
-//                 .setSize(300,10)
-//                 .setValue(flock.nActive)
-//                 .setColorBackground(color(100,0,0))
-//                 .setColorActive(color(200,0,0))
-//                 .setColorForeground(color(200,0,0));
-//    slZScale = cp5.addSlider("Z Scale")
-//                  .plugTo(parent,"zScale")
-//                  .setRange(0, 1)
-//                  .setPosition(10,210 + moveKnobsY)
-//                  .setSize(300,10)
-//                  .setValue(0.5)
-//                  .setColorBackground(color(100,0,0))
-//                  .setColorActive(color(200,0,0))
-//                  .setColorForeground(color(200,0,0));               
                 
     //==========sliders in blue====================================
     int moveSlidersY = 20;
@@ -171,7 +148,6 @@ public class ControlFrame extends PApplet {
 //                .setSize(300,10)
 //                .setValue(2.0);
     slHomeForce = cp5.addSlider("home  Force"  )
-                .plugTo(parent,"homeForce"  )
                 .setRange(0.0, forceMax)
                 .setPosition(10,290 + moveSlidersY)
                 .setSize(300,10)
@@ -192,7 +168,6 @@ public class ControlFrame extends PApplet {
                   .setColorForeground(color(0,150,0));
     slAudioThreshold = cp5.addSlider("Audio  threshold")
                   .setRange(0.001, 0.06)
-                  .plugTo(parent,"audioThreshold" )
                   .setPosition(10,-50) //offscreen
                   .setSize(300,10)
                   .setValue(0.02)
@@ -277,17 +252,34 @@ public class ControlFrame extends PApplet {
        .setValue(0)
        .setPosition(290,390 + moveButtonsDown)
        .setSize(20,20);
+       
+    if (inputDataMode == 1) {
+      btWriteMovesFile = cp5.addButton("write  moves") 
+                 .setValue(0)
+                 .setPosition(290,height - 50)
+                 .setSize(20,20); 
+    }
 
     updateCheckboxes(); 
   }
 
   public void draw() {
-    if (frameCount % updateAudioFeedbackOnNthFrame == 0) {      
-      background(40);  
+    if (frameCount % updateAudioFeedbackOnNthFrame == 0) {
+      if (inputDataMode == 2) {
+        background(0);
+      } else {      
+        background(40);
+      }
+      
     
       color c = color(255,100,100);
     
       text("Framerate: " + str(round(mainFrameRate)), 20, height - 50);
+      if (inputDataMode == 1) {
+        text("Recording data", 20, height - 35);
+      } else if (inputDataMode == 2) {
+        text("Reading data", 20, height - 35);
+      }
       
       if (activeSliderY > 0) {
         fill(255);
@@ -305,11 +297,11 @@ public class ControlFrame extends PApplet {
       
       strokeWeight(12.0);        
       //lines showing level
-      if (freqBalance != null) {
+      if (inputData != null) {
         float pxForMaxAudioThreshold = 300; 
         float pxForStartAudioLevelBar = 20;
         
-        if (freqBalance.prevLowLev() > audioThreshold && freqBalance.prevLowLev() > freqBalance.prevHighLev()) {
+        if (inputData.prevLowLev > inputData.audioThreshold && inputData.prevLowLev > inputData.prevHighLev) {
           stroke(c);
         } else {
           stroke(255);
@@ -318,9 +310,9 @@ public class ControlFrame extends PApplet {
              this.height - pxForStartAudioLevelBar,
              this.width - 80,
              this.height - (pxForStartAudioLevelBar + 
-                            pxForMaxAudioThreshold * freqBalance.prevLowLev() / slAudioThreshold.getMax()) );      
+                            pxForMaxAudioThreshold * inputData.prevLowLev / slAudioThreshold.getMax()) );      
         
-        if (freqBalance.prevHighLev() > audioThreshold && freqBalance.prevHighLev() > freqBalance.prevLowLev()) {
+        if (inputData.prevHighLev > inputData.audioThreshold && inputData.prevHighLev > inputData.prevLowLev) {
           stroke(c);
         } else {
           stroke(255);
@@ -328,7 +320,7 @@ public class ControlFrame extends PApplet {
         line(this.width - 40,
              this.height - pxForStartAudioLevelBar,
              this.width - 40,
-             this.height - (pxForStartAudioLevelBar + pxForMaxAudioThreshold * freqBalance.prevHighLev() / slAudioThreshold.getMax()) );      
+             this.height - (pxForStartAudioLevelBar + pxForMaxAudioThreshold * inputData.prevHighLev / slAudioThreshold.getMax()) );      
   
         //line showing threshold
         stroke(200,100,0);
@@ -347,7 +339,7 @@ public class ControlFrame extends PApplet {
           line(this.width - 120,
                this.height - pxForStartAudioLevelBar,
                this.width - 120, //<>//
-               this.height - (pxForStartAudioLevelBar + 10.0 * (freqBalance.logdVdt) ) );
+               this.height - (pxForStartAudioLevelBar + 10.0 * inputData.logdVdt ) );
         }
        
         //strokeWeight( 1.0 );  
@@ -359,32 +351,31 @@ public class ControlFrame extends PApplet {
        
         //FFT
         if (showPeakiness) {
-          stroke(180);
-          strokeWeight( 1.0 );
-          strokeCap( NORMAL );
-          line(300, 50, 300 + fft.previousPeakiness.length, 50);
-          
-          stroke(255);
-          strokeWeight( 2.0 );
-          strokeCap( NORMAL );
-          float fftScale = 3;
-          for (int i = 1; i < fft.previousPeakiness.length; i++) {
-            line(i - 1 + 300, 
-                 50 - fftScale * fft.previousPeakiness[i - 1],//log(freqBalance.previousSpect[ i - 1 ]), 
-                 i + 300, 
-                 50 - fftScale * fft.previousPeakiness[i] ); //log(freqBalance.previousSpect[ i ]));
-          }
+//          stroke(180);
+//          strokeWeight( 1.0 );
+//          strokeCap( NORMAL );
+//          line(300, 50, 300 + fft.previousPeakiness.length, 50);
+//          
+//          stroke(255);
+//          strokeWeight( 2.0 );
+//          strokeCap( NORMAL );
+//          float fftScale = 3;
+//          for (int i = 1; i < fft.previousPeakiness.length; i++) {
+//            line(i - 1 + 300, 
+//                 50 - fftScale * fft.previousPeakiness[i - 1],//log(freqBalance.previousSpect[ i - 1 ]), 
+//                 i + 300, 
+//                 50 - fftScale * fft.previousPeakiness[i] ); //log(freqBalance.previousSpect[ i ]));
+//          }
           
          
           //spectral flatness
-          //text(str(fft.previousPeakiness[0]),100,100);
           stroke(0,180,230);
           strokeWeight(12.0);
           strokeCap(ROUND);
           line(this.width - 160,
               this.height - pxForStartAudioLevelBar,
               this.width - 160,
-              this.height - (pxForStartAudioLevelBar + 30. * fft.previousPeakiness[0] ) );
+              this.height - (pxForStartAudioLevelBar + 30. * inputData.peakiness ) );
         } //peakiness
 
         //show the portion in each CDF
@@ -431,55 +422,26 @@ public class ControlFrame extends PApplet {
     } 
   } //draw
     
-  void controlEvent(ControlEvent theEvent) {    
-    //if (theEvent.isFrom(cbdVdtToCohesion)) {
-    //  dVdtSense = cbdVdtToCohesion.getState(0);
-    //}
-    
-    //if (theEvent.isFrom(cbPeakinessSense)) {
-    //  peakinessSense = cbPeakinessSense.getState(0);
-    //}
-    
-    if (theEvent.isFrom(cbPeakinessToParticleYVelocity)) {
-      peakinessToParticleYVelocity = cbPeakinessToParticleYVelocity.getState(0);
-    }
+  void controlEvent(ControlEvent theEvent) {
+    //sliders
+    if (theEvent.isFrom(slSpectralPeakinessSensitivity)) inputData.peakinessSensitivity = slSpectralPeakinessSensitivity.getValue();
+    if (theEvent.isFrom(sldVdtSensitivity)) inputData.dVdtSensitivity = sldVdtSensitivity.getValue();
+    if (theEvent.isFrom(slHomeForce)) inputData.homeForce = slHomeForce.getValue();
+    if (theEvent.isFrom(slAudioThreshold)) inputData.audioThreshold = slAudioThreshold.getValue();
+    if (theEvent.isFrom(cbPeakinessToParticleYVelocity)) inputData.peakinessToParticleYVelocity = cbPeakinessToParticleYVelocity.getState(0);
+    if (theEvent.isFrom(cbdVdtToParticleXVelocity)) inputData.dVdtToParticleXVelocity = cbdVdtToParticleXVelocity.getState(0);
+    if (theEvent.isFrom( slSplitFreq )) freqBalance.setSplitFrequency( getSplitFreq() );
 
-    if (theEvent.isFrom(cbdVdtToParticleXVelocity)) {
-      dVdtToParticleXVelocity = cbdVdtToParticleXVelocity.getState(0);
-    }
-       
     //----------------------------view control buttons---------------------------
-    if (theEvent.isFrom(btXPLus100) || theEvent.isFrom(btXMinus100)) {
-      flock.addVectorToAll(new PVector(theEvent.getValue(), 0.0, 0.0));
-    }
-    
-    if (theEvent.isFrom(btYPlus100) || theEvent.isFrom(btYMinus100)) {
-      flock.addVectorToAll(new PVector(0.0, theEvent.getValue(), 0.0));
-    }
-    
-    if (theEvent.isFrom(btZoomIn)) {
-      zoomIn();
-    }
-    
-    if (theEvent.isFrom(btZoomOut)) {
-      zoomOut();
-    }
-    
-    if (theEvent.isFrom(btHeap1)) {
-      sendAllToCDFWithImage(cdf1, "heap.png");
-    }
-
-    if (theEvent.isFrom(btCross1)) {
-      sendAllToCDFWithImage(cdf1, "cross.png");
-    }    
-        
-    if (theEvent.isFrom(btHeap2)) {
-      sendAllToCDFWithImage(cdf2, "heap.png");
-    }
-
-    if (theEvent.isFrom(btCross2)) {
-      sendAllToCDFWithImage(cdf2, "cross.png");
-    }    
+    if (theEvent.isFrom(btXPLus100) || theEvent.isFrom(btXMinus100)) flock.addVectorToAll(new PVector(theEvent.getValue(), 0.0, 0.0));
+    if (theEvent.isFrom(btYPlus100) || theEvent.isFrom(btYMinus100)) flock.addVectorToAll(new PVector(0.0, theEvent.getValue(), 0.0));
+    if (theEvent.isFrom(btZoomIn)) zoomIn();
+    if (theEvent.isFrom(btZoomOut)) zoomOut();
+    if (theEvent.isFrom(btHeap1)) sendAllToCDFWithImage(cdf1, "heap.png");
+    if (theEvent.isFrom(btCross1)) sendAllToCDFWithImage(cdf1, "cross.png");
+    if (theEvent.isFrom(btHeap2)) sendAllToCDFWithImage(cdf2, "heap.png");
+    if (theEvent.isFrom(btCross2))  sendAllToCDFWithImage(cdf2, "cross.png");
+    if (theEvent.isFrom(btWriteMovesFile) || inputDataMode == 1) writeOutputMoves();        
        
     if (theEvent.isFrom( slNumberInCDF2 )) {
       int targetNumberCDF2 = round(slNumberInCDF2.getValue() * flock.nActive);
@@ -489,41 +451,23 @@ public class ControlFrame extends PApplet {
         flock.makeNInCDF( flock.nActive - targetNumberCDF2 , cdf1 );
       }
     }
-    
-    if (theEvent.isFrom( slSplitFreq )) {
-      freqBalance.setSplitFrequency( getSplitFreq() );
-    }
-    
-    //if (theEvent.isFrom( slNumActiveParticles )) {
-    //  flock.setNumActiveParticles( round(slNumActiveParticles.getValue()) );
-    //}  
   } //updateEvent
   
-  public void updateSliders () {
+  public void updateSlidersAndText (float aFrameRate) {
     float portionInCDF2 = float(flock.numberInCDF(cdf2)) / float(flock.nActive);
     slNumberInCDF2.setValue(portionInCDF2);
+    
+    this.mainFrameRate = 0.75 * this.mainFrameRate + 0.25*aFrameRate;
   }
 
-  private void updateCheckboxes () {
-    //if (dVdtSense) {
-    //  cbdVdtToCohesion.activate(0);
-    //} else {
-    //  cbdVdtToCohesion.deactivate(0);
-    //}
-    
-    //if (peakinessSense) {
-    //  cbPeakinessSense.activate(0);
-    //} else {
-    //  cbPeakinessSense.deactivate(0);
-    //}
-    
-    if (peakinessToParticleYVelocity) {
+  public void updateCheckboxes () {
+    if (inputData.peakinessToParticleYVelocity) {
       cbPeakinessToParticleYVelocity.activate(0);
     } else {
       cbPeakinessToParticleYVelocity.deactivate(0);
     }
     
-    if (dVdtToParticleXVelocity) {
+    if (inputData.dVdtToParticleXVelocity) {
       cbdVdtToParticleXVelocity.activate(0);
     } else {
       cbdVdtToParticleXVelocity.deactivate(0);

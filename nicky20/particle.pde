@@ -7,22 +7,13 @@ class Particle {
   //rotation
   private PVector rotation;
   private PVector rotationVelocity;
-  
-  //target position
-  //private PVector target;
-  //private boolean targetReached = true;
-  //private float   targetRadius = 5.0;
-  
+    
   //home position
   private PVector home;
   
   public  boolean isOne;
   public  boolean useImage = true;
-  //private static final float moveByDenominator = 8;
   private static final float maxRotationSpeed = 0.06;
-  //static final float maxspeed = 30;    // Maximum speed
-  //public  static final float maxMaxSpeed = 10.0;
-  //public  static final float minMinSpeed = 0.5;
   private static final float maxforce = 0.2;    // Maximum steering force
   
   public static final float minDistanceForForces = 100.0;
@@ -58,8 +49,6 @@ class Particle {
   }
   
   public void vectorTo (PVector vector, CDF sender) {
-    //target = vector;
-    //targetReached = false;
     home = vector;
     CDFParent = sender;
   }
@@ -68,23 +57,17 @@ class Particle {
     return (isOne ? "I" : "0");
   }
   
-  String getInfo () {
-    String[] s = {"x ", str(pos.x) ,"   y ", str(pos.y) , "    " ,  str(pos.z) };
-    return join(s,"");  
+  String toString() {
+    return "x " + str(pos.x) + ", y " + str(pos.y) + ", z" + str(pos.z) + ", roation x " + str(rotation.x) + ", y " + str(rotation.y) + ", z" + str(rotation.z);  
   }
   
-  public void iterate () {
-    //rotation.add(rotationVelocity);
+  public void rotateIt (InputData inputData) {
     PVector rotVel = new PVector(rotationVelocity.x,rotationVelocity.y,rotationVelocity.z);
-    //if (random(10000) < 1) { 
-      //println(fft.previousPeakiness[0]);
-      //println(freqBalance.logLev);
-    //}
-    if (fft.previousPeakiness[0] > 0) {
-      rotVel.mult( 30.0 / fft.previousPeakiness[0] / fft.previousPeakiness[0] );
+    if (inputData.peakiness2 > 0) {
+      rotVel.mult( 30.0 / inputData.peakiness2 );
     }
-    if (freqBalance.logLev > 0) {
-      rotVel.mult(freqBalance.logLev * freqBalance.logLev / 300.0);
+    if (inputData.logLev2 > 0) {
+      rotVel.mult(inputData.logLev2 / 300.0);
     }
     rotation.add( rotVel );
   }
@@ -120,7 +103,7 @@ class Particle {
       
   // Separation
   // Method checks for nearby particles and steers away
-  private PVector separate (ArrayList<Particle> particles, float[] distances, int nActive) {
+  private PVector separate (ArrayList<Particle> particles, float[] distances, int nActive, InputData input) {
     float desiredseparation = 50.0f;
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
@@ -145,13 +128,10 @@ class Particle {
 
     // As long as the vector is greater than 0
     if (steer.mag() > 0) {
-      // First two lines of code below could be condensed with new PVector setMag() method
-      // Not using this method until Processing.js catches up
-      // steer.setMag(maxspeed);
 
       // Implement Reynolds: Steering = Desired - Velocity
       steer.normalize();
-      steer.mult(maxParticleSpeed);//steer.mult(maxspeed);
+      steer.mult(input.maxParticleSpeed);//steer.mult(maxspeed);
       steer.sub(velocity);
       steer.limit(maxforce);
     }
@@ -160,7 +140,7 @@ class Particle {
   
     // Alignment
   // For every nearby boid in the system, calculate the average velocity
-  private PVector align (ArrayList<Particle> particles, float[] distances, int nActive) {
+  private PVector align (ArrayList<Particle> particles, float[] distances, int nActive, InputData input) {
     float neighbordist = 100;
     PVector sum = new PVector(0, 0, 0);
     int count = 0;
@@ -174,13 +154,10 @@ class Particle {
     }
     if (count > 0) {
       sum.div((float)count);
-      // First two lines of code below could be condensed with new PVector setMag() method
-      // Not using this method until Processing.js catches up
-      // sum.setMag(maxspeed);
 
       // Implement Reynolds: Steering = Desired - Velocity
       sum.normalize();
-      sum.mult(maxParticleSpeed);//sum.mult(maxspeed);
+      sum.mult(input.maxParticleSpeed);//sum.mult(maxspeed);
       PVector steer = PVector.sub(sum, velocity);
       steer.limit(maxforce);
       return steer;
@@ -192,7 +169,7 @@ class Particle {
   
   // Cohesion
   // For the average location (i.e. center) of all nearby boids, calculate steering vector towards that location
-  private PVector cohesion (ArrayList<Particle> particles, float[] distances, int nActive) {
+  private PVector cohesion (ArrayList<Particle> particles, float[] distances, int nActive, InputData input) {
     float neighbordist = 100;
     PVector sum = new PVector(0, 0, 0);   // Start with empty vector to accumulate all locations
     int count = 0;
@@ -206,7 +183,7 @@ class Particle {
     }
     if (count > 0) {
       sum.div(count);
-      return seek(sum);  // Steer towards the location
+      return seek(sum, input);  // Steer towards the location
     } 
     else {
       return new PVector(0, 0, 0);
@@ -214,21 +191,17 @@ class Particle {
   }
   
   //BackHome
-  private PVector backHome () {    
-    return seek(home);
+  private PVector backHome (InputData input) {    
+    return seek(home, input);
   }
   
     // A method that calculates and applies a steering force towards a target
   // STEER = DESIRED MINUS VELOCITY
-  private PVector seek(PVector target) {
+  private PVector seek(PVector target, InputData input) {
     PVector desired = PVector.sub(target, pos);  // A vector pointing from the location to the target
     // Scale to maximum speed
     desired.normalize();
-    desired.mult(maxParticleSpeed);//desired.mult(maxspeed);
-
-    // Above two lines of code below could be condensed with new PVector setMag() method
-    // Not using this method until Processing.js catches up
-    // desired.setMag(maxspeed);
+    desired.mult(input.maxParticleSpeed);//desired.mult(maxspeed);
 
     // Steering = Desired minus Velocity
     PVector steer = PVector.sub(desired, velocity);
@@ -238,40 +211,38 @@ class Particle {
   
   
   
-  void runFlocking(ArrayList<Particle> particles, float[] distances, int nActive) {
-    //flock(particles, distances, nActive);
-    
-    PVector sep = separate(particles,distances,nActive);   // Separation
-    PVector ali = align(particles,distances,nActive);      // Alignment
-    PVector coh = cohesion(particles,distances,nActive);   // Cohesion
-    PVector hom = backHome();
+  void runFlocking(ArrayList<Particle> particles, 
+                   float[] distances, 
+                   int nActive, 
+                   InputData input) {//float logdVdt,float adVdtSensitivity,float peakiness,float aPeakinessSensitivity,float dLevdtSmoothed,boolean adVdtToParticleXVelocity,boolean aPeakinessToParticleYVelocity) {    
+    PVector sep = separate(particles,distances,nActive,input);   // Separation
+    PVector ali = align(particles,distances,nActive,input);      // Alignment
+    PVector coh = cohesion(particles,distances,nActive,input);   // Cohesion
+    PVector hom = backHome(input);
     
     // Arbitrarily weight these forces
     float sepForce = separationForce;
-    if (dVdtSensitivity > 0) {
-      sepForce += dVdtSensitivity * freqBalance.logdVdt;
+    if (input.dVdtSensitivity > 0) {
+      sepForce += input.dVdtSensitivity * input.logdVdt;
     }
-    if (peakinessSensitivity > 0) {
-      sepForce += peakinessSensitivity * fft.previousPeakiness[0];
+    if (input.peakinessSensitivity > 0) {
+      sepForce += input.peakinessSensitivity * input.peakiness;
     }
     sep.mult(sepForce);
     
     float aliForce = alignmentForce;
-    //if (peakinessSensitivity < 0) {
-    //  aliForce += -peakinessSensitivity * fft.previousPeakiness[0];
-    //}
     ali.mult(aliForce);
     
     float cohForce = cohesionForce;
-    if (dVdtSensitivity < 0) {
-      cohForce += -dVdtSensitivity * freqBalance.logdVdt;
+    if (input.dVdtSensitivity < 0) {
+      cohForce += -input.dVdtSensitivity * input.logdVdt;
     }
-    if (peakinessSensitivity < 0) {
-      cohForce += -peakinessSensitivity * fft.previousPeakiness[0];
+    if (input.peakinessSensitivity < 0) {
+      cohForce += -input.peakinessSensitivity * input.peakiness;
     }    
     coh.mult(cohForce);
     
-    hom.mult(homeForce);
+    hom.mult(input.homeForce);
     
     // Add the force vectors to acceleration
     applyForce(sep);
@@ -282,17 +253,17 @@ class Particle {
     // Update velocity
     velocity.add(acceleration);
     // Limit speed
-    float mxSpeed = maxParticleSpeed;
-    mxSpeed += dVdtSensitivity * freqBalance.logdVdt;
-    mxSpeed += peakinessSensitivity * fft.previousPeakiness[0];
+    float mxSpeed = input.maxParticleSpeed;
+    mxSpeed += input.dVdtSensitivity * input.logdVdt;
+    mxSpeed += input.peakinessSensitivity * input.peakiness;
     velocity.limit(mxSpeed);
     
     PVector tmpVelocity = new PVector(velocity.x, velocity.y, velocity.z);
-    if (dVdtToParticleXVelocity) {
-      tmpVelocity.x *= dVdtSensitivity * freqBalance.dLevdtSmoothed * 2.0; 
+    if (input.dVdtToParticleXVelocity) {
+      tmpVelocity.x *= input.dVdtSensitivity * input.dLevdtSmoothed * 2.0; 
     }
-    if (peakinessToParticleYVelocity) {
-      tmpVelocity.y *= peakinessSensitivity * fft.previousPeakiness[0] * 0.25;
+    if (input.peakinessToParticleYVelocity) {
+      tmpVelocity.y *= input.peakinessSensitivity * input.peakiness * 0.25;
     } 
     pos.add(tmpVelocity);
     
@@ -304,37 +275,5 @@ class Particle {
   private void applyForce(PVector force) {
     // We could add mass here if we want A = F / M
     acceleration.add(force);
-  }
-
-//  // We accumulate a new acceleration each time based on three rules
-//  private void flock(ArrayList<Particle> particles, float[] distances, int nActive) {
-//    //float[] distances = getDistances(particles);
-//    PVector sep = separate(particles,distances);   // Separation
-//    PVector ali = align(particles,distances);      // Alignment
-//    PVector coh = cohesion(particles,distances);   // Cohesion
-//    PVector hom = backHome();
-//    // Arbitrarily weight these forces
-//    sep.mult(separationForce);
-//    ali.mult(alignmentForce);
-//    coh.mult(cohesionForce);
-//    hom.mult(homeForce);
-//    
-//    // Add the force vectors to acceleration
-//    applyForce(sep);
-//    applyForce(ali);
-//    applyForce(coh);
-//    applyForce(hom);
-//  }
-
-//  private void updateFromFlocking() {
-//    // Update velocity
-//    velocity.add(acceleration);
-//    // Limit speed
-//    velocity.limit(maxParticleSpeed);//velocity.limit(maxspeed);
-//    //println(velocity, "    ", maxParticleSpeed);
-//    //rotation = velocity;
-//    pos.add(velocity);
-//    // Reset acceleration to 0 each cycle
-//    acceleration.mult(0);
-//  } 
+  } 
 } 
