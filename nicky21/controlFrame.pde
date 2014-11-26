@@ -29,9 +29,9 @@ public class ControlFrame extends PApplet {
   
   int activeSliderY = 0;
   
-  private final static float zoomFactor = 0.02;
-  private final static int movesPerZoom = 8;
-  private ArrayList<Float> zoomMoves = new ArrayList<Float>();
+  //private final static float zoomFactor = 0.02;
+  //private final static int movesPerZoom = 8;
+  //private ArrayList<Float> zoomMoves = new ArrayList<Float>();
 
   private int nChangingCDF = 0;
   private int nChangingCDFFrameCount = 0;  
@@ -47,6 +47,7 @@ public class ControlFrame extends PApplet {
   Slider slHomeForce;
   Slider sldVdtSensitivity;
   //Slider slSpectralPeakinessSensitivity;
+  Slider slZoom;
   
   CheckBox cbPeakinessToParticleYVelocity;
   CheckBox cbdVdtToParticleXVelocity;
@@ -55,8 +56,8 @@ public class ControlFrame extends PApplet {
   Button btXMinus100;
   Button btYPlus100;
   Button btYMinus100;
-  Button btZoomIn;
-  Button btZoomOut;
+  //Button btZoomIn;
+  //Button btZoomOut;
   
   Button btHeap1;
   Button btCross1;
@@ -92,7 +93,7 @@ public class ControlFrame extends PApplet {
     //cp5.setControlFont(p );
 
     
-    //==========knobs in red=======================================================
+    //=================================================================
     int moveKnobsY = 20; 
      
     //purple
@@ -125,7 +126,6 @@ public class ControlFrame extends PApplet {
                   .setSize(300,10)
                   .setValue(0.0);
                 
-    //==========sliders in blue====================================
     int moveSlidersY = 20;
     
     //red
@@ -176,6 +176,14 @@ public class ControlFrame extends PApplet {
                   .setColorForeground(color(200,100,0));
       
 
+    slZoom = cp5.addSlider("Zoom")
+                  .setRange(200, 1600)
+                  .setPosition(10,390 + moveSlidersY) 
+                  .setSize(300,10)
+                  .setValue(800)
+                  .setColorBackground(color(100,100,50))
+                  .setColorActive(color(200,200,100))
+                  .setColorForeground(color(200,200,100));
           
     //------------checkboxes controll item general behaviours-------------------------
 //      cbdVdtToCohesion = cp5.addCheckBox("cbdVdtToCohesion")
@@ -226,14 +234,14 @@ public class ControlFrame extends PApplet {
        .setPosition(70,350 + moveButtonsDown)
        .setSize(20,20);   
   
-     btZoomIn = cp5.addButton("z+") 
-       .setValue(1.0/1.08)
-       .setPosition(150,350 + moveButtonsDown)
-       .setSize(20,20); 
-     btZoomOut = cp5.addButton("z-") 
-       .setValue(1.08)
-       .setPosition(150,390 + moveButtonsDown)
-       .setSize(20,20); 
+//     btZoomIn = cp5.addButton("z+") 
+//       .setValue(1.0/1.08)
+//       .setPosition(150,350 + moveButtonsDown)
+//       .setSize(20,20); 
+//     btZoomOut = cp5.addButton("z-") 
+//       .setValue(1.08)
+//       .setPosition(150,390 + moveButtonsDown)
+//       .setSize(20,20); 
       
     btHeap1 = cp5.addButton("1:heap") 
        .setValue(0)
@@ -431,12 +439,13 @@ public class ControlFrame extends PApplet {
     if (theEvent.isFrom(cbPeakinessToParticleYVelocity)) inputData.peakinessToParticleYVelocity = cbPeakinessToParticleYVelocity.getState(0);
     if (theEvent.isFrom(cbdVdtToParticleXVelocity)) inputData.dVdtToParticleXVelocity = cbdVdtToParticleXVelocity.getState(0);
     if (theEvent.isFrom( slSplitFreq )) freqBalance.setSplitFrequency( getSplitFreq() );
+    if (theEvent.isFrom( slZoom )) inputData.cameraDist = slZoom.getValue();
 
     //----------------------------view control buttons---------------------------
     if (theEvent.isFrom(btXPLus100) || theEvent.isFrom(btXMinus100)) flock.addVectorToAll(new PVector(theEvent.getValue(), 0.0, 0.0));
     if (theEvent.isFrom(btYPlus100) || theEvent.isFrom(btYMinus100)) flock.addVectorToAll(new PVector(0.0, theEvent.getValue(), 0.0));
-    if (theEvent.isFrom(btZoomIn)) zoomIn();
-    if (theEvent.isFrom(btZoomOut)) zoomOut();
+    //if (theEvent.isFrom(btZoomIn)) zoomIn();
+    //if (theEvent.isFrom(btZoomOut)) zoomOut();
     if (theEvent.isFrom(btHeap1)) sendAllToCDFWithImage(cdf1, "heap.png");
     if (theEvent.isFrom(btCross1)) sendAllToCDFWithImage(cdf1, "cross.png");
     if (theEvent.isFrom(btHeap2)) sendAllToCDFWithImage(cdf2, "heap.png");
@@ -495,8 +504,8 @@ public class ControlFrame extends PApplet {
     final int k = keyCode;
     
     //arrow keys - moving the view--------------------------   
-    if (k == 107 || k == 33) zoomIn();
-    if (k == 109 || k == 34) zoomOut();
+    //if (k == 107 || k == 33) zoomIn();
+    //if (k == 109 || k == 34) zoomOut();
 
     //mac keycodes?  104 38 up, 98 40 down, 100 37 left, 102 39 right
     //right, left
@@ -510,41 +519,41 @@ public class ControlFrame extends PApplet {
   }
 
   
-  private void zoomOut () {
-    float[] moves = triangular(movesPerZoom);
-    int i = 0;
-    for (float f : moves) {
-      if (i < zoomMoves.size()) {
-        zoomMoves.set(i,zoomMoves.get(i) * (1.0 + (zoomFactor * f)));
-      } else {
-        zoomMoves.add(1.0 + (zoomFactor * f));
-      }
-      i++;
-    }          
-  }
-  
-  private void zoomIn () {
-    float[] moves = triangular(movesPerZoom);
-    int i = 0;
-    for (float f : moves) {
-      if (i < zoomMoves.size()) {
-        zoomMoves.set(i,zoomMoves.get(i) * 1.0/(1.0 + (zoomFactor * f)));
-      } else {
-        zoomMoves.add(1.0/(1.0 + (zoomFactor * f)));
-      }
-      i++;
-    }          
-  }
-  
-  public float getZoom () {
-    if (zoomMoves.size() == 0) {
-      return 1.0;
-    } else {
-      float z = zoomMoves.get(0);
-      zoomMoves.remove(0);
-      return z;
-    }
-  }
+//  private void zoomOut () {
+//    float[] moves = triangular(movesPerZoom);
+//    int i = 0;
+//    for (float f : moves) {
+//      if (i < zoomMoves.size()) {
+//        zoomMoves.set(i,zoomMoves.get(i) * (1.0 + (zoomFactor * f)));
+//      } else {
+//        zoomMoves.add(1.0 + (zoomFactor * f));
+//      }
+//      i++;
+//    }          
+//  }
+//  
+//  private void zoomIn () {
+//    float[] moves = triangular(movesPerZoom);
+//    int i = 0;
+//    for (float f : moves) {
+//      if (i < zoomMoves.size()) {
+//        zoomMoves.set(i,zoomMoves.get(i) * 1.0/(1.0 + (zoomFactor * f)));
+//      } else {
+//        zoomMoves.add(1.0/(1.0 + (zoomFactor * f)));
+//      }
+//      i++;
+//    }          
+//  }
+//  
+//  public float getZoom () {
+//    if (zoomMoves.size() == 0) {
+//      return 1.0;
+//    } else {
+//      float z = zoomMoves.get(0);
+//      zoomMoves.remove(0);
+//      return z;
+//    }
+//  }
 
   float[] triangular (int len) {
     float[] pdf = new float[len];

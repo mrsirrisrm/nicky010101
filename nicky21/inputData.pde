@@ -26,6 +26,10 @@ class InputData {
   //derived
   float peakiness2 = peakiness*peakiness;
   float logLev2 = logLev * logLev;
+  float smoothedCameraDist = 2000.0;
+  
+  //static
+  private static final float cameraSmoothing = 0.1;
  
   public void setAll(float aprevLowLev, 
                      float aprevHighLev, 
@@ -48,7 +52,11 @@ class InputData {
   
   public void deriveValues() {
     this.peakiness2 = this.peakiness * this.peakiness;
-    this.logLev2 = this.logLev * this.logLev;    
+    this.logLev2 = this.logLev * this.logLev;
+    float camDiff = this.cameraDist - this.smoothedCameraDist; 
+    if (abs(camDiff) > 1) { 
+      this.smoothedCameraDist += camDiff * cameraSmoothing;      
+    }
   }
   
   public String output() {

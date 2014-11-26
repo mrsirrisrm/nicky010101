@@ -76,6 +76,7 @@ void setup () {
   midiInput.plugControllerSlider(3,cf.slHomeForce);
   midiInput.plugControllerSlider(4,cf.slParticleSpeed);
   midiInput.plugControllerSlider(5,cf.slAudioThreshold);
+  midiInput.plugControllerSlider(6,cf.slZoom);
   
   midiInput.plugControllerSlider(7,cf.slNumberInCDF2); //offscreen
   
@@ -135,7 +136,7 @@ void draw () {
       inputData.maxParticleSpeed = cf.slParticleSpeed.getMax();
     }
     
-    inputData.cameraDist *= cf.getZoom();
+    //inputData.cameraDist *= cf.getZoom();
     
     inputData.prevLowLev = freqBalance.prevLowLev();
     inputData.prevHighLev = freqBalance.prevHighLev();
@@ -160,7 +161,7 @@ void draw () {
     cf.updateSlidersAndText(frameRate);    
   }
   
-  camera(width/2, height/2, inputData.cameraDist, 
+  camera(width/2, height/2, inputData.smoothedCameraDist, 
           width/2, height/2, 0, 
           0.0, 1.0, 0.0);
           
