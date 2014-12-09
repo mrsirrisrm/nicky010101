@@ -46,7 +46,7 @@ public class ControlFrame extends PApplet {
   //Slider slCohesionForce;
   Slider slHomeForce;
   Slider sldVdtSensitivity;
-  //Slider slSpectralPeakinessSensitivity;
+  Slider slSpectralPeakinessSensitivity;
   Slider slZoom;
   
   CheckBox cbPeakinessToParticleYVelocity;
@@ -115,11 +115,13 @@ public class ControlFrame extends PApplet {
                   .setColorForeground(color(160,0,160));             
 
     //blue
-    //slSpectralPeakinessSensitivity = cp5.addSlider("peakiness  sensitivity")
-    //              .setRange(-1., 1.)
-    //              .setPosition(10,210 + moveKnobsY)
-    //              .setSize(300,10)
-    //              .setValue(0.0);
+    if (useFFT) {
+      slSpectralPeakinessSensitivity = cp5.addSlider("peakiness  sensitivity")
+                    .setRange(-1., 1.)
+                    .setPosition(10,210 + moveKnobsY)
+                    .setSize(300,10)
+                    .setValue(0.0);
+    }
     sldVdtSensitivity = cp5.addSlider("dVdt  sensitivity")
                   .setRange(-10., 10.)
                   .setPosition(10,230 + moveKnobsY)
@@ -432,7 +434,7 @@ public class ControlFrame extends PApplet {
     
   void controlEvent(ControlEvent theEvent) {
     //sliders
-    //if (theEvent.isFrom(slSpectralPeakinessSensitivity)) inputData.peakinessSensitivity = slSpectralPeakinessSensitivity.getValue();
+    if (theEvent.isFrom(slSpectralPeakinessSensitivity)) inputData.peakinessSensitivity = slSpectralPeakinessSensitivity.getValue();
     if (theEvent.isFrom(sldVdtSensitivity)) inputData.dVdtSensitivity = sldVdtSensitivity.getValue();
     if (theEvent.isFrom(slHomeForce)) inputData.homeForce = slHomeForce.getValue();
     if (theEvent.isFrom(slAudioThreshold)) inputData.audioThreshold = slAudioThreshold.getValue();
@@ -517,43 +519,6 @@ public class ControlFrame extends PApplet {
 
     updateCheckboxes();
   }
-
-  
-//  private void zoomOut () {
-//    float[] moves = triangular(movesPerZoom);
-//    int i = 0;
-//    for (float f : moves) {
-//      if (i < zoomMoves.size()) {
-//        zoomMoves.set(i,zoomMoves.get(i) * (1.0 + (zoomFactor * f)));
-//      } else {
-//        zoomMoves.add(1.0 + (zoomFactor * f));
-//      }
-//      i++;
-//    }          
-//  }
-//  
-//  private void zoomIn () {
-//    float[] moves = triangular(movesPerZoom);
-//    int i = 0;
-//    for (float f : moves) {
-//      if (i < zoomMoves.size()) {
-//        zoomMoves.set(i,zoomMoves.get(i) * 1.0/(1.0 + (zoomFactor * f)));
-//      } else {
-//        zoomMoves.add(1.0/(1.0 + (zoomFactor * f)));
-//      }
-//      i++;
-//    }          
-//  }
-//  
-//  public float getZoom () {
-//    if (zoomMoves.size() == 0) {
-//      return 1.0;
-//    } else {
-//      float z = zoomMoves.get(0);
-//      zoomMoves.remove(0);
-//      return z;
-//    }
-//  }
 
   float[] triangular (int len) {
     float[] pdf = new float[len];

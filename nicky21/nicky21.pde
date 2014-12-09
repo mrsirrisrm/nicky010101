@@ -3,7 +3,7 @@ ControlFrame cf;
 MidiInput midiInput;
 CDF cdf1, cdf2;
 FreqBalance freqBalance;
-//FFTAnalysis fft;
+FFTAnalysis fft;
 InputData inputData;
 PImage img0; //stamp image
 PImage img1; //stamp image
@@ -13,6 +13,7 @@ final float separationForce = 2.2;
 final float alignmentForce = 2.0;    
 final float cohesionForce = 2.0;
 final float forceMax = 4.5;
+final boolean useFFT = true;
 final boolean showPeakiness = false;
 final boolean showDVDT = false;
 final float moveParticlesBetweenCDFSensitivity = 6.0;
@@ -71,7 +72,9 @@ void setup () {
   //setup midi controller
   midiInput = new MidiInput(this);
   midiInput.plugControllerSlider(0,cf.slSplitFreq);
-  //midiInput.plugControllerSlider(1,cf.slSpectralPeakinessSensitivity);
+  if (useFFT) {
+    midiInput.plugControllerSlider(1,cf.slSpectralPeakinessSensitivity);
+  }
   midiInput.plugControllerSlider(2,cf.sldVdtSensitivity);
   midiInput.plugControllerSlider(3,cf.slHomeForce);
   midiInput.plugControllerSlider(4,cf.slParticleSpeed);
@@ -87,7 +90,9 @@ void setup () {
 
   //audio input analysis 
   freqBalance = new FreqBalance( this, cf.getSplitFreq() );
-  //fft = new FFTAnalysis( this );
+  if (useFFT) {
+    fft = new FFTAnalysis( this );
+  }
 
   println("width " , width);
   println("height ", height);
@@ -122,9 +127,9 @@ void draw () {
     //to get mic input 
     freqBalance.update();
     
-    //if (frameCount % FFTAnalysis.updatePerFrames == 0) {
-    //  fft.update();
-    //}  
+    if (frameCount % FFTAnalysis.updatePerFrames == 0 && useFFT) {
+      fft.update();
+    }  
     
     inputData.maxParticleSpeed = map(freqBalance.level(),
                                      0.0,
@@ -141,7 +146,9 @@ void draw () {
     inputData.prevLowLev = freqBalance.prevLowLev();
     inputData.prevHighLev = freqBalance.prevHighLev();
     inputData.mix = freqBalance.mix;
-    //inputData.peakiness = fft.previousPeakiness[0];
+    if (useFFT) {
+      inputData.peakiness = fft.previousPeakiness[0];
+    }
     inputData.logLev = freqBalance.logLev;
     inputData.logdVdt = freqBalance.logdVdt;
     inputData.dLevdtSmoothed = freqBalance.dLevdtSmoothed;
@@ -161,7 +168,7 @@ void draw () {
     cf.updateSlidersAndText(frameRate);    
   }
   
-  camera(width/2, height/2, inputData.smoothedCameraDist, 
+  camera(width/2, height/2, inputData.smoothedSmoothedCameraDist, 
           width/2, height/2, 0, 
           0.0, 1.0, 0.0);
           
@@ -207,7 +214,9 @@ void prepareExitHandler () {
 //        }
     
         freqBalance.close();
-        //fft.close();
+        if (useFFT) {
+          fft.close();
+        }
       }
     }
   }));
