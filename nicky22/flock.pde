@@ -1,9 +1,17 @@
+void doFlockCalcThread() {
+  //flock.calcAllDistances();
+  flock.calcSomeDistances();
+}
+
 class Flock { 
 
   private ArrayList<Particle> particles;
   private ArrayList<float[]> distances;
   private ArrayList<int[]> nextUpdateIn;
-  public  int nActive;
+  private int nActive;
+  private int nextPartOfDistancesToCalc = 0;
+  private static final int divideDistancesCalcIntoNParts = 2;
+  private boolean[] isCalculating = new boolean[divideDistancesCalcIntoNParts]; 
   
   private static final float highDist = 999999;
   
@@ -23,6 +31,10 @@ class Flock {
     nActive = aNActive;
     moveAllItemsFromImageCDF(cdf);
     vectorAllItemsFromImageCDF(cdf);
+    
+    for (int i = 0; i < divideDistancesCalcIntoNParts; i++) {
+      isCalculating[i] = false;
+    }
   }
   
   public void setNumActiveParticles (int n) {
@@ -81,19 +93,14 @@ class Flock {
   }
   
   public void allRunFlocking (InputData inputData) { //float logdVdt,float adVdtSensitivity,float peakiness,float aPeakinessSensitivity,float dLevdtSmoothed,boolean adVdtToParticleXVelocity,boolean aPeakinessToParticleYVelocity) {
-    
-    //long startTime = System.nanoTime();
-    calcAllDistances ();
-    //println("calc distances", (System.nanoTime() - startTime));
-    
-    
-    //startTime = System.nanoTime();
+    thread("doFlockCalcThread");
+    thread("doFlockCalcThread");
+    //this.calcAllDistances();
     //for (Particle part : particles) {
     for (int i = 0; i < nActive; i++ ) {
       Particle part = particles.get(i);  
       part.runFlocking(particles,distances.get(i),nActive,inputData);
     }
-    //println("run flocking", (System.nanoTime() - startTime));
   }
 
   public void allRotate (InputData inputData) {
@@ -131,9 +138,35 @@ class Flock {
     int x = cdf.weightedRandomInt2DX () ;
     part.vectorTo(new PVector(x , cdf.weightedRandomInt2DY( x ), cdf.randomZ()) , cdf);  
   }  
+
+  private void calcSomeDistances() {
+    if (this.divideDistancesCalcIntoNParts == 2) {
+      if (nextPartOfDistancesToCalc == 0) {
+        if (!isCalculating[0]) {
+          nextPartOfDistancesToCalc = 1;
+          isCalculating[0] = true;
+          this.calcTheseDistances(0,floor(0.33*nActive));
+          isCalculating[0] = false;
+        }
+      } else {
+        nextPartOfDistancesToCalc = 0;
+        isCalculating[1] = true;
+        this.calcTheseDistances(ceil(0.33*nActive),nActive);
+        isCalculating[1] = false;
+      }
+    }
+  }
   
   private void calcAllDistances () {
-    for (int i = 0; i < nActive; i++ ) {
+    if (!this.isCalculating[0]) {
+      this.isCalculating[0] = true;
+      this.calcTheseDistances(0,nActive);
+      this.isCalculating[0] = false;
+    }
+  }
+  
+  private void calcTheseDistances (int iStart, int iEnd) {
+    for (int i = iStart; i < iEnd; i++ ) {
       Particle part = particles.get(i);
       distances.get(i)[i] = 0; //self
       
