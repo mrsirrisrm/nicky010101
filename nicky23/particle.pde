@@ -1,3 +1,14 @@
+import java.util.Arrays;
+
+//class MapRef {
+//  public int x,y,z;
+//  
+//  public int index() {
+//    int n = 30;
+//    return x + y*n + z*n*n; 
+//  }
+//}
+
 class Particle { 
   //position
   public  PVector pos; 
@@ -11,6 +22,7 @@ class Particle {
   //home position
   private PVector home;
   
+  public  int[] mapRef = new int[27];
   public  boolean isOne;
   public  boolean useImage = true;
   private static final float maxRotationSpeed = 0.06;
@@ -46,6 +58,7 @@ class Particle {
   public void moveTo (PVector vector, CDF sender) {
     pos = vector;
     CDFParent = sender;
+    //updateMapRef();
   }
   
   public void vectorTo (PVector vector, CDF sender) {
@@ -277,20 +290,46 @@ class Particle {
     acceleration.add(force);
   } 
   
-  public int mapRef() {
-    int boxSize = 100;
-    int n = 30;
-    int x = round(this.pos.x) / boxSize;
-    int y = round(this.pos.y) / boxSize;
-    int z = round(this.pos.z) / boxSize; 
-    
-    return z*n*n + y*n + x; 
+//  public void updateMapRef() {
+//    int boxSize = 100;
+//    //int n = 30;
+//    this.mapRef.x = round(this.pos.x) / boxSize;
+//    this.mapRef.y = round(this.pos.y) / boxSize;
+//    this.mapRef.z = round(this.pos.z) / boxSize; 
+//    //return z*n*n + y*n + x; 
+//  }
+
+  public void updateMapRefs() {
+    int i = flock.posListsCalculateDimInd(pos.x,width);
+    int j = flock.posListsCalculateDimInd(pos.y,height);
+    int k = flock.posListsCalculateDimInd(pos.z,width);
+    for (int m = 0; m < 3; m++) {
+      for (int n = 0; n < 3; n++) {
+        for (int o = 0; o < 3; o++) {
+          mapRef[m + n*3 + o*9] = flock.posListsInd(i - 1 + m,j - 1 + n,k + o);
+        }
+      }
+    }
+  }
+
+  public int centralMapRef() {
+    return this.mapRef[13];
+  }
+  
+  public boolean neighbouringParticle(int otherParticleCentralMapRef) {
+    for (int i = 0; i < 27; i++) {
+      if (this.mapRef[i] == otherParticleCentralMapRef) {
+        return true;
+      }
+    }
+    return false;
   }
 } 
 
-//public class ParticleComparator implements Comparator<Particle> {
-//    @Override
-//    public int compare(Particle o1, Particle o2) {
-//        return o1.mapRef().compareTo(o2.mapRef());
-//    }
-//}
+import java.util.Comparator;
+public class ParticleComparator implements Comparator<Particle> {
+    @Override
+    public int compare(Particle o1, Particle o2) {
+        return o1.centralMapRef() - o2.centralMapRef();
+    }
+}

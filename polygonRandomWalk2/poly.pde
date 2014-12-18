@@ -215,7 +215,7 @@ class Poly extends Polygon {
   public String toString() {
     String s = "";    
     for (int i = 0; i < npoints; i++) {
-      s += str(xpoints[i]) + "," + str(ypoints[i]) + ";";
+      s += str(float(xpoints[i]) / width) + "," + str(float(ypoints[i]) / height) + ";";
     }
     return s;
   } 

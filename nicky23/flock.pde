@@ -1,3 +1,5 @@
+import java.util.Collections;
+
 void doFlockAllCalcThread() {
   flock.calcAllDistances();
 }
@@ -10,11 +12,14 @@ class Flock {
 
   private ArrayList<Particle> particles;
   private ArrayList<float[]> distances;
-  private ArrayList<int[]> nextUpdateIn;
+  //private ArrayList<int[]> nextUpdateIn;
   private int nActive;
   private int nextPartOfDistancesToCalc = 0;
   private static final int divideDistancesCalcIntoNParts = 2;
   private boolean[] isCalculating = new boolean[divideDistancesCalcIntoNParts]; 
+  
+  private int posListsDim;
+  private ArrayList<ArrayList<Particle>> posLists;
   
   private static final float highDist = 999999;
   
@@ -23,11 +28,17 @@ class Flock {
   Flock (int numParticles, int aNActive, CDF cdf) {
     particles = new ArrayList<Particle>(numParticles);
     distances = new ArrayList<float[]>(numParticles);
-    nextUpdateIn = new ArrayList<int[]>(numParticles);
+    //nextUpdateIn = new ArrayList<int[]>(numParticles);
+    posListsDim = ceil( min(width,height) / Particle.minDistanceForForces);
+    //println(posListsDim);
+    posLists = new ArrayList<ArrayList<Particle>>(posListsDim*posListsDim*posListsDim);
+    for (int i = 0; i < posListsDim*posListsDim*posListsDim; i++) {
+      posLists.add(new ArrayList<Particle>());
+    }
     for (int i = 0; i < numParticles; i++) {
       particles.add( new Particle(new PVector(0.0 , 0.0 , 0.0)) );
       distances.add( new float[numParticles] );
-      nextUpdateIn.add( new int[numParticles] ); //default 0
+      //nextUpdateIn.add( new int[numParticles] ); //default 0
     } 
     particles.get(0).isOne = false;
     particles.get(1).isOne = true;
@@ -169,22 +180,34 @@ class Flock {
   }
   
   private void calcTheseDistances (int iStart, int iEnd) {
+    int[] centralMapRefs = new int[nActive];
+    for (int i = iStart + 1; i < nActive; i++ ) {
+      centralMapRefs[i] = particles.get(i).centralMapRef();
+    }
+    
     for (int i = iStart; i < iEnd; i++ ) {
       Particle part = particles.get(i);
-      distances.get(i)[i] = 0; //self
+      //distances.get(i)[i] = 0; //self
       
-      for (int j = i + 1; j < nActive; j++ ) {               
-        if (nextUpdateIn.get(i)[j] > 0) {
-          nextUpdateIn.get(i)[j]--;
-          continue;          
+      for (int j = i + 1; j < nActive; j++ ) { 
+                  
+        //Particle other = particles.get(j);
+        
+        if (!part.neighbouringParticle(centralMapRefs[j])) {
+           continue;
         } 
-          
+        
+        //if (nextUpdateIn.get(i)[j] > 0) {
+        //  nextUpdateIn.get(i)[j]--;
+        //  continue;          
+        //} 
+
         Particle other = particles.get(j);
         
         float dx = abs(part.pos.x - other.pos.x);
         if (dx > Particle.minDistanceForDontUpdateForNIterations) {
           set2Dist(i,j,highDist);
-          nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
+          //nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
           continue;  
         } else if (dx > Particle.minDistanceForForces) {
           set2Dist(i,j,highDist);
@@ -194,7 +217,7 @@ class Flock {
         float dy = abs(part.pos.y - other.pos.y);
         if (dy > Particle.minDistanceForDontUpdateForNIterations) {
           set2Dist(i,j,highDist);
-          nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
+          //nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
           continue;  
         } else if (dy > Particle.minDistanceForForces) {
           set2Dist(i,j,highDist);
@@ -205,7 +228,7 @@ class Flock {
         float dz = abs(part.pos.z - other.pos.z);
         if (dz > Particle.minDistanceForDontUpdateForNIterations) {
           set2Dist(i,j,highDist);
-          nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
+          //nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
           continue;  
         } else if (dz > Particle.minDistanceForForces) {
           set2Dist(i,j,highDist);
@@ -215,7 +238,7 @@ class Flock {
         float distSquared = (dx*dx + dy*dy + dz*dz);
         if (distSquared > Particle.minDistanceForDontUpdateForNIterationsSquared) {
           set2Dist(i,j,highDist);
-          nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
+          //nextUpdateIn.get(i)[j] = Particle.dontUpdateForNIterations;
           continue;
         } else if (distSquared > Particle.minDistanceForForcesSquared) {
           set2Dist(i,j,highDist);
@@ -225,6 +248,7 @@ class Flock {
         set2Dist(i,j,sqrt(distSquared));
       }//j
     } //i
+    //println(100*notNeighbourCnt/(neighbourCnt + notNeighbourCnt), 100*neighbourCnt/(neighbourCnt + notNeighbourCnt));
   }
   
   private void set2Dist (int i , int j, float d) {
@@ -244,7 +268,32 @@ class Flock {
   }
   
   public void sortParticles() {
+    Collections.sort(this.particles, new ParticleComparator());  
+  }
+  
+  public int posListsInd(int i, int j, int k) {
+    return i + j*posListsDim + k*posListsDim*posListsDim;
+  }
+  
+  public int posListsCalculateDimInd(float d, int totalDimLength) {
+    if (d <= 0) {
+      return 0;
+    } else if (d >= totalDimLength) {
+      return posListsDim - 1;
+    } else {
+      return round(d/totalDimLength*(posListsDim - 1));
+    }
+  }
+  
+  private void updatePosLists() {
+    //for (ArrayList<Particle> list : posLists) {
+    //  list.clear();
+    //}
     
+    for (Particle p : particles) {
+      p.updateMapRefs();
+      //posLists.get(ind).add(p);
+    }
   }
   
   public int runInputStep(InputData input) {
@@ -261,13 +310,14 @@ class Flock {
     }
     
     this.allTextDraw();
-    this.allRunFlocking(input);//freqBalance.logdVdt,dVdtSensitivity,fft.previousPeakiness[0],peakinessSensitivity,freqBalance.dLevdtSmoothed,dVdtToParticleXVelocity,peakinessToParticleYVelocity);
-    this.allRotate(input);//fft.previousPeakiness[0], freqBalance.logLev);
-    //println(particles.get(0));
+    //this.sortParticles();
+    //long startTime = System.nanoTime();
+    this.updatePosLists();    
+    this.allRunFlocking(input);
+    //println((System.nanoTime() - startTime) / 1000);
+    this.allRotate(input);
     this.getNewTargetForParticles(2);
    
     return numToMove; 
   }
 }
-
-

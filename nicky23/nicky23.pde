@@ -65,7 +65,7 @@ void setup () {
   cdf2.setupPDF2DFromImageFile("cross.png");
   
   //make the flock
-  flock = new Flock( 1200 , 1200 ,  cdf1 );
+  flock = new Flock( 1400 , 1400 ,  cdf1 );
   
   cf = addControlFrame("control", 700, 600);
    
