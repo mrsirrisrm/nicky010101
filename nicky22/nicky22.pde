@@ -1,3 +1,8 @@
+int inputDataMode = 0; //0 : normal, 1 : write moves to file, 2 : read moves from file. NB 2 can be set back to 0 when the file ends
+final int makeNthFrameToPNG = 0; //0 : no video, 1 : write video
+
+
+
 Flock flock;
 ControlFrame cf;
 MidiInput midiInput;
@@ -17,10 +22,7 @@ final boolean useFFT = true;
 final boolean showPeakiness = false;
 final boolean showDVDT = false;
 final float moveParticlesBetweenCDFSensitivity = 6.0;
-final int makeNthFrameToPNG = 0; //0 for no video
-final float targetVideoFrameRate = 30.0;
-
-int inputDataMode = 0; //0 : nothing  1 : write moves to file  2 : read moves from file. NB 2 can be set back to 0 when the file ends
+final float targetVideoFrameRate = 25.0;
 
 int videoPNGCount = 0;
 String outString = "";
@@ -122,7 +124,7 @@ void draw () {
     
   if (inputDataMode == 2) {
     inputData.readInputLine();
-    println("input line ", inputData.currentInputLine, " approx time (s)", inputData.currentInputLine / 30 );
+    println("input line ", inputData.currentInputLine, " approx time (s)", float(frameCount) / targetVideoFrameRate );
   } else {
     //to get mic input 
     freqBalance.update();
@@ -140,8 +142,6 @@ void draw () {
       println("setting maxMaxSpeed ", cf.slParticleSpeed.getMax());
       inputData.maxParticleSpeed = cf.slParticleSpeed.getMax();
     }
-    
-    //inputData.cameraDist *= cf.getZoom();
     
     inputData.prevLowLev = freqBalance.prevLowLev();
     inputData.prevHighLev = freqBalance.prevHighLev();

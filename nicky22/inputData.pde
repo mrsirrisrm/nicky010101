@@ -1,4 +1,5 @@
 class InputData {
+  //saved-----------------------------------------------
   //from audio inputs
   float prevLowLev = 0.1; 
   float prevHighLev = 0.1; 
@@ -18,10 +19,12 @@ class InputData {
   
   boolean dVdtToParticleXVelocity = false;
   boolean peakinessToParticleYVelocity = false;
+  //end of saved-----------------------------------------
   
   //internal
   private int currentInputLine = 0;
   private String[] inputLines;
+  private int firstFrameMillis = -1;
   
   //derived
   public float peakiness2 = peakiness*peakiness;
@@ -31,25 +34,6 @@ class InputData {
   
   //static
   private static final float cameraSmoothing = 0.1;
- 
-  public void setAll(float aprevLowLev, 
-                     float aprevHighLev, 
-                     float amix, 
-                     float apeakiness,
-                     float alogLev, 
-                     float alogdVdt, 
-                     float adLevdtSmoothed) {
-    this.prevLowLev = aprevLowLev; 
-    this.prevHighLev = aprevHighLev; 
-    this.mix = amix; 
-    this.peakiness = apeakiness;
-    this.logLev = alogLev; 
-    this.logdVdt = alogdVdt; 
-    this.dLevdtSmoothed = adLevdtSmoothed;
-
-    //derived
-    deriveValues(); 
-  }
   
   public void deriveValues() {
     this.peakiness2 = this.peakiness * this.peakiness;
@@ -67,7 +51,10 @@ class InputData {
   }
   
   public String output() {
-    return str(millis()) + "," +
+    if (firstFrameMillis < 0) {
+      firstFrameMillis = millis();
+    }
+    return str(millis() - firstFrameMillis) + "," +
            str(this.prevLowLev) + "," + 
            str(this.prevHighLev) + "," + 
            str(this.mix) + "," + 
@@ -93,7 +80,7 @@ class InputData {
       
       int lineMillis;
       try {lineMillis = Integer.parseInt(list[0]);} catch(NumberFormatException e) {lineMillis = 0;}
-      if (1000.0 * float(frameCount) / targetVideoFrameRate > lineMillis) {
+      if (1000.0 * float(frameCount) / targetVideoFrameRate >= lineMillis) {
         currentInputLine++;
         
         //audio
@@ -119,6 +106,7 @@ class InputData {
      
     } else {
       inputDataMode = 0; //at end of file, pass control back to the controller
+      println("End of input file, switching back to manual control");
     }
   }
   
