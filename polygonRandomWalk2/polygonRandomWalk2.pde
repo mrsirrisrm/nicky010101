@@ -3,7 +3,7 @@ PolyList oldPolys = new PolyList();
 
 
 void setup() {
-  size(900,700,P2D);
+  size(700,700,P2D);
   smooth();
   
   polys.polys.add(new Poly(350));
@@ -33,7 +33,7 @@ void mouseClicked() {
   
   if (mouseX < 2*20 && mouseY < 20) {
     println("to file");
-    polys.toFile("test.txt");
+    polys.toFile("chunks.txt");
     return;
   }   
   

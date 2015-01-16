@@ -152,13 +152,12 @@ void draw () {
     inputData.logLev = freqBalance.logLev;
     inputData.logdVdt = freqBalance.logdVdt;
     inputData.dLevdtSmoothed = freqBalance.dLevdtSmoothed;
-    
-    inputData.deriveValues();
-                     
+                         
     if (inputDataMode == 1) {
       outString += inputData.output();
     }                     
   }
+  inputData.deriveValues();
 
   int numToMove = flock.runInputStep(inputData); //THIS IS THE MAIN FUNCTION
   cf.showNChangingCDF( numToMove );    
