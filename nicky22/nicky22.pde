@@ -1,6 +1,6 @@
 int inputDataMode = 0; //0 : normal, 1 : write moves to file, 2 : read moves from file. NB 2 can be set back to 0 when the file ends
 final int makeNthFrameToPNG = 0; //0 : no video, 1 : write video
-
+final String videoOutputDir = System.getProperty("user.home") + "/Movies/processingFrames"; //set to some directory in your home folder
 
 
 Flock flock;
@@ -172,8 +172,8 @@ void draw () {
           0.0, 1.0, 0.0);
           
   if (makeNthFrameToPNG != 0) { 
-    if (frameCount % makeNthFrameToPNG == 0) {    
-      saveFrame("/Users/martin/Movies/processingFrames/frame_" + String.format("%04d", videoPNGCount) + ".png");
+    if (frameCount > 1 && frameCount % makeNthFrameToPNG == 0) {    
+      saveFrame(videoOutputDir + "/frame_" + String.format("%04d", videoPNGCount) + ".png");
       videoPNGCount++;
     }
   }  //<>//

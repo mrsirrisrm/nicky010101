@@ -1,0 +1,25 @@
+2,homeForce,0,0,,//no home force
+3,homeForce,,1.8,,//activate home force
+3,inputPositionsMode,0,0
+3,allVelocityAdd,0,0,0
+3,freeAllParticles
+3,homeForceLocation,0,800,939
+28,homeForceLocation,0,678,943
+55,homeForceLocation,0,551,937
+83,homeForceLocation,0,464,903
+110,homeForceLocation,0,373,872
+138,homeForceLocation,0,266,813
+165,homeForceLocation,0,205,722
+193,homeForceLocation,0,178,621
+220,homeForceLocation,0,190,503
+248,homeForceLocation,0,229,409
+275,homeForceLocation,0,290,353
+303,homeForceLocation,0,349,316
+330,homeForceLocation,0,424,259
+358,homeForceLocation,0,500,216
+385,homeForceLocation,0,583,166
+413,homeForceLocation,0,700,126
+440,homeForceLocation,0,798,101
+468,homeForceLocation,0,922,64
+500,homeForceLocation,0,930,-100
+530,homeForceLocation,0,930,-300
