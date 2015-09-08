@@ -148,7 +148,9 @@ class SequenceAction {
     } else if (this.action.equals("assignHomeForceIndexWithProbability")) {
       flock.assignHomeForceIndexWithProbability(float(this.value) / 1000.0, float(this.value2) / 1000.0); //*******  NB val / 1000.0
     } else if (this.action.equals("assignHomeForceIndexWithLocation")) {
-      flock.assignHomeForceIndexWithLocation(ths.chunkIndex, this.value, this.value2); 
+      flock.assignHomeForceIndexWithLocation(this.chunkIndex, this.value, this.value2); 
+    } else if (this.action.equals("stragglers")) {
+      flock.stragglers(this.chunkIndex, this.value, float(this.value2) / 1000.0);
     }
   }
   

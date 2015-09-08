@@ -21,7 +21,7 @@ public static final int kDisordering = 4;
 
 class Flock { 
 
-  private float[] xs, ys, dxs, dys, rotations, drotations;
+  private float[] xs, ys, dxs, dys, rotations, drotations, speedModifiers;
   private float[] drawxs, drawys, ddrawxs, ddrawys;
   private int[] states;
   private float[] stateMixes;
@@ -80,6 +80,7 @@ class Flock {
     dys = new float[numParticles];
     rotations = new float[numParticles];
     drotations = new float[numParticles];
+    speedModifiers = new float[numParticles];
     
     states = new int[numParticles];
     stateMixes = new float[numParticles];
@@ -108,6 +109,7 @@ class Flock {
       chunkIndices[n] = -1;
       rotations[n] = random(0 , 1000);
       drotations[n] = random(-Flock.maxRotationSpeed , Flock.maxRotationSpeed);
+      speedModifiers[n] = 1.0;
     } 
     
     chunks = new ArrayList<Chunk>();
@@ -540,8 +542,8 @@ class Flock {
     this.limitSpeed(n);
     //dxs[n] += velocityTrendX + random(-velocityTrendDistribution,velocityTrendDistribution);
     //dys[n] += velocityTrendY + random(-velocityTrendDistribution,velocityTrendDistribution); 
-    xs[n] += dxs[n];
-    ys[n] += dys[n];
+    xs[n] += dxs[n] * speedModifiers[n];
+    ys[n] += dys[n] * speedModifiers[n];
     
     updateSmoothedPositions(n,motionSmoothing);
   }
@@ -1115,6 +1117,21 @@ class Flock {
         homeForceIndices[n] = 0;
       } else {
         homeForceIndices[n] = 1;
+      }
+    }
+  }
+  
+  public void stragglers(int direction, int count, float value) {
+    float[] arr = new float[ys.length];
+    for (int n = 0; n < xs.length; n++) {
+      //TODO direction
+      arr[n] = ys[n];
+    }
+    Arrays.sort(arr);
+    float cutoff = arr[arr.length - 1 - count];
+    for (int n = 0; n < xs.length; n++) {
+      if (ys[n] > cutoff) {
+        speedModifiers[n] = value;
       }
     }
   }

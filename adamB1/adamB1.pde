@@ -28,9 +28,9 @@ float maxInitialDistFromCenter = 0;
 final String chunksFile = "/Users/martin/Pictures/nicky/NickyChunkIndices.dat";
 Sequence sequence;// = new Sequence(sequenceFile);
 
-final String frameOutputDir = "/Users/martin/Movies/processingFramesAdamB1a/";
+final String frameOutputDir = "/Users/martin/Movies/processingFramesAdamB1c/";
 final String recordedMovesFile = "recordedMoves.txt";
-final int makeNthFrameToPNG = 0; //0 for no video
+final int makeNthFrameToPNG = 1; //0 for no video
 int firstVideoFrame = -1;
 int lastVideoFrame = 99999;
 final int videoOversample = 1;
@@ -40,8 +40,8 @@ final float targetVideoFrameRate = 25.0;
 boolean shutdownCalled = false;
 
 String positionsFile = "/Users/martin/Movies/processingPositionsAdam/outputPositionsB1.dat";
-int inputPositionsMode = 0; //0 : nothing  1 : write positions to file  2 : read positions from file
-int inputPositionsStartFromFrame = 940;  //   <--------------------------------*************
+int inputPositionsMode = 2; //0 : nothing  1 : write positions to file  2 : read positions from file
+int inputPositionsStartFromFrame = 970;  //   <--------------------------------*************
 boolean fullDraw = true;
 boolean useMiniFlocks = true;
 float disorderingRadius;
@@ -63,8 +63,8 @@ Random randForInts = new Random();
 void setup () {
   randomSeed(0);
   noiseSeed(0);  
-  //size(1920, 1080, P3D);
-  size(round(0.66*1920), round(0.66*1080), P3D);
+  size(1920, 1080, P3D);
+  //size(round(0.66*1920), round(0.66*1080), P3D);
   //size(round(0.5*1920), round(0.5*1080), P3D); 
   if (frame != null) {
     frame.setResizable(false);
@@ -94,9 +94,9 @@ void setup () {
   
   inputData = new InputData();
      
-  //int COUNT = 19942; 
+  int COUNT = 19942; 
   //int COUNT = 9912;
-  int COUNT = 3000;  
+  //int COUNT = 3000;  
   flock = new Flock( COUNT , inputPositionsMode, inputPositionsStartFromFrame);
   
   if (inputPositionsMode != 2) {

@@ -1,4 +1,4 @@
-2,homeForce,0,0,,//no home force
+2,homeForce,,0,,//no home force
 2,inverseDisorderRate,0,160,,//disordering inverse rate
 2,erosionRate,28,0,,//no erosion center chunk
 2,erosionRate,1,4,,
@@ -40,28 +40,59 @@
 700,erosionRate,28,18,,//center chunk erosion
 750,dissolve,17,,,
 800,dissolve,23,,,
-1000,homeForce,,1.8,,//activate home force
+1000,homeForce,,50,,
+1020,homeForce,,100,,
+1040,homeForce,,200,,
+1080,homeForce,,300,,
+1120,homeForce,,400,,
+1160,homeForce,,550,,
+1200,homeForce,,700,,
 1000,inputPositionsMode,0,0
-1000,useMiniFlocks,,0,
-1000,allVelocityAdd,0,0,10
+1000,allVelocityAdd,0,0,0
+1000,homeForceRadius,,0
 1001,freeAllParticles
-1000,homeForceLocation,0,800,939
-1028,homeForceLocation,0,678,943
-1055,homeForceLocation,0,551,937
-1083,homeForceLocation,0,464,903
-1110,homeForceLocation,0,373,872
-1138,homeForceLocation,0,266,813
-1165,homeForceLocation,0,205,722
-1193,homeForceLocation,0,178,621
-1220,homeForceLocation,0,190,503
-1248,homeForceLocation,0,229,409
-1275,homeForceLocation,0,290,353
-1303,homeForceLocation,0,349,316
-1330,homeForceLocation,0,424,259
-1358,homeForceLocation,0,500,216
-1385,homeForceLocation,0,583,166
-1413,homeForceLocation,0,700,126
-1440,homeForceLocation,0,798,101
-1468,homeForceLocation,0,922,64
-1500,homeForceLocation,0,930,-100
-1530,homeForceLocation,0,930,-300
+1000,homeForceLocation,,800,500
+1100,homeForceLocation,,950,520
+1200,homeForceLocation,,1100,570
+1300,homeForceLocation,,1250,650
+1400,homeForceLocation,,1380,750
+1500,homeForceLocation,,1500,780
+1600,homeForceLocation,,1380,810
+1700,homeForceLocation,,1230,850
+1800,homeForceLocation,,1050,880
+1900,homeForceLocation,,850,920
+2000,homeForceLocation,,800,939
+2000,separationForce,,3100,
+2000,cohesionForce,,1900,
+2112,homeForceLocation,,678,943
+2220,homeForceLocation,,551,937
+2332,homeForceLocation,,464,903
+2440,homeForceLocation,,373,872
+2500,separationForce,,3200,
+2500,cohesionForce,,1800,
+2552,homeForceLocation,,266,813
+2660,homeForceLocation,,205,722
+2772,homeForceLocation,,178,621
+2880,homeForceLocation,,190,503
+2992,homeForceLocation,,229,409
+3100,homeForceLocation,,290,353
+3212,homeForceLocation,,349,316
+3320,homeForceLocation,,424,259
+3432,homeForceLocation,,500,216
+3500,assignHomeForceIndexWithLocation,150,450,270, //top left of group
+3540,homeForceLocation,0,583,166
+3540,homeForceLocation,1,483,166
+3652,homeForceLocation,0,700,126
+3652,homeForceLocation,1,400,126
+3760,homeForceLocation,0,798,101
+3760,homeForceLocation,1,380,101
+3872,homeForceLocation,0,922,64
+3872,homeForceLocation,1,350,64
+4000,homeForceLocation,0,930,-100
+4000,homeForceLocation,1,300,-100
+4120,homeForceLocation,0,930,-300
+4120,homeForceLocation,1,300,-300
+4200,homeForceLocation,0,930,-1000
+4200,homeForceLocation,1,300,-1000
+4300,homeForceLocation,0,930,-2000
+4300,homeForceLocation,1,300,-2000
