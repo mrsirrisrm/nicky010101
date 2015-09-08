@@ -75,18 +75,19 @@
 2772,homeForceLocation,,178,621
 2880,homeForceLocation,,190,503
 2992,homeForceLocation,,229,409
-3000,stragglers,0,2,900
+//3000,stragglers,0,2,900
 3100,homeForceLocation,,290,353
-3100,stragglers,0,4,800
+//3100,stragglers,0,4,800
 3212,homeForceLocation,,349,316
 3320,homeForceLocation,,424,259
 3432,homeForceLocation,,500,216
 3500,assignHomeForceIndexWithLocation,150,450,270, //top left of group
-3500,stragglers,0,8,800
+3500,stragglers,0,3,800
 3540,homeForceLocation,0,583,166
 3540,homeForceLocation,1,483,166
 3652,homeForceLocation,0,700,126
 3652,homeForceLocation,1,400,126
+3655,stragglers,0,1,700
 3760,homeForceLocation,0,798,101
 3760,homeForceLocation,1,380,101
 3872,homeForceLocation,0,922,64

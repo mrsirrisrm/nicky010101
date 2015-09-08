@@ -131,10 +131,6 @@ class SequenceAction {
       flock.freeAllParticles();
     } else if (this.action.equals("useMiniFlocks")) {
       useMiniFlocks = this.value == 1;
-    } else if (this.action.equals("allVelocityAdd")) {
-      //flock.velocityTrendX = float(this.value) / 1000.0;    //*******  NB val / 1000.0
-      //flock.velocityTrendY = float(this.value2) / 1000.0;     //*******  NB val / 1000.0
-      flock.velocityTrendDistribution = float(this.chunkIndex) / 1000.0;  //*******  NB val / 1000.0
     } else if (this.action.equals("homeForceRadius")) {
       for (HomeForce homeForce: this.homeForcesForIndex(this.chunkIndex)) {
         homeForce.radius = float(this.value);

@@ -47,10 +47,6 @@ class Flock {
   private MiniFlocks miniFlocks = new MiniFlocks();
   private float maxPermanentGridDistFromCenter = 0;
   
-  //private float velocityTrendX = 0;
-  //private float velocityTrendY = 0;
-  private float velocityTrendDistribution = 0;
-  
   InputStream fis = null;
   DataInputStream dis = null;
   FileOutputStream fos = null;
