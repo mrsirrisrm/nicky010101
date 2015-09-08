@@ -28,6 +28,7 @@ class Flock {
   private int[] stateChangeCountdown;
   private boolean[] isOnes;
   private int[] chunkIndices;
+  private int[] homeForceIndices;
   
   private List<Integer> permanentGridInds;
   public List<Float> erosionAngles;
@@ -84,7 +85,8 @@ class Flock {
     stateMixes = new float[numParticles];
     stateChangeCountdown = new int[numParticles];   
     isOnes = new boolean[numParticles];
-    chunkIndices = new int[numParticles];   
+    chunkIndices = new int[numParticles];
+    homeForceIndices = new int[numParticles];   
     permanentGridInds = new ArrayList<Integer>();
     erosionAngles = new ArrayList<Float>();
     
@@ -520,7 +522,6 @@ class Flock {
 
     for (int n = 0; n < xs.length; n++) {
       PVector homeF = homeForceForParticle(n);
-      
       runFlockingWithKeptForces(n,homeF,false);
     }
     //permanentGridRepelFreeParticles();
@@ -531,9 +532,10 @@ class Flock {
     dys[n] += (sepKeepsy[n] * separationForce + aliKeepsy[n] * alignmentForce + cohKeepsy[n] * cohesionForce);
     dxs[n] += grdKeepsx[n] * antiGridForce + gr2Keepsx[n] * antiGridForce2;
     dys[n] += grdKeepsy[n] * antiGridForce + gr2Keepsy[n] * antiGridForce2;
-    if (homeForce != 0) {
-      dxs[n] += homeF.x * homeForce;
-      dys[n] += homeF.y * homeForce;
+    HomeForce homeForce = homeForces.get(homeForceIndices[n]);
+    if (homeForce.force != 0) {
+      dxs[n] += homeF.x * homeForce.force;
+      dys[n] += homeF.y * homeForce.force;
     }
     this.limitSpeed(n);
     //dxs[n] += velocityTrendX + random(-velocityTrendDistribution,velocityTrendDistribution);
@@ -552,11 +554,13 @@ class Flock {
   }
   
   public PVector homeForceForParticle(int n) {
-    if (homeForce == 0) {
+    HomeForce homeForce = homeForces.get(homeForceIndices[n]);
+    if (homeForce.force == 0) {
       return new PVector(0,0);
     } else {
       //add a little bit of fudging to the homeforce target locations
-      PVector steer = new PVector(homeForceX + random(- homeForceRadius, homeForceRadius)  - xs[n], homeForceY - random(- homeForceRadius, homeForceRadius) - ys[n]);
+      PVector steer = new PVector(homeForce.x + random(- homeForce.radius, homeForce.radius) - xs[n], 
+                                  homeForce.y - random(- homeForce.radius, homeForce.radius) - ys[n]);
       steer.limit(maxforce);
       return steer;
     }
@@ -1088,6 +1092,30 @@ class Flock {
     for (int n = 0; n < xs.length; n++) {
       states[n] = kFree;
       chunkIndices[n] = -1;
+    }
+  }
+  
+  public void assignHomeForceIndexWithProbability(float p1, float p2) {
+    for (int n = 0; n < homeForceIndices.length; n++) {
+      if (random(0,1) < p1 ) {
+        homeForceIndices[n] = 0;
+      } else if (random(0,1) < p2) {
+        homeForceIndices[n] = 1;
+      } else {
+        homeForceIndices[n] = 2;
+      }
+    }
+  }
+  
+  public void assignHomeForceIndexWithLocation(int radius, int x, int y) {
+    float radiusSquared = radius * radius;
+    for (int n = 0; n < homeForceIndices.length; n++) {
+      float distSquared = (x - xs[n])*(x - xs[n]) + (y - ys[n])*(y - ys[n]);
+      if (distSquared > radiusSquared) {
+        homeForceIndices[n] = 0;
+      } else {
+        homeForceIndices[n] = 1;
+      }
     }
   }
 }

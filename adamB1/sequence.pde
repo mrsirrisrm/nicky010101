@@ -101,6 +101,8 @@ class SequenceAction {
   }
   
   void runAction() {
+    if (this.frame == -1) return;
+    
     if (this.action.equals("release")) {
       flock.releaseChunk(this.chunkIndex);
     } else if (this.action.equals("dissolve")) {
@@ -109,13 +111,15 @@ class SequenceAction {
       flock.chunks.get(this.chunkIndex).erosionRate = this.value;
     } else if (this.action.equals("inverseDisorderRate")) {
       disorderingInverseRate = this.value;
-    } else if (this.action.equals("homeForce")) {      
-      homeForce = float(this.value) / 1000.0;   //*******  NB val / 1000.0
-      println("homeforce",homeForce);
-    } else if (this.action.equals("homeForceLocation")) {     
-      homeForceX = this.value;
-      homeForceY = this.value2;
-      //println("homeforceV",homeForceX,homeForceY);
+    } else if (this.action.equals("homeForce")) {
+      for (HomeForce homeForce: this.homeForcesForIndex(this.chunkIndex)) {
+        homeForce.force = float(this.value) / 1000.0;
+      } 
+    } else if (this.action.equals("homeForceLocation")) {
+      for (HomeForce homeForce: this.homeForcesForIndex(this.chunkIndex)) {
+        homeForce.x = this.value;
+        homeForce.y = this.value2;
+      }     
     } else if (this.action.equals("inputPositionsMode")) {
       if (inputPositionsMode != 0 && this.value == 0) {
         //println("closing positions file");
@@ -132,13 +136,30 @@ class SequenceAction {
       //flock.velocityTrendY = float(this.value2) / 1000.0;     //*******  NB val / 1000.0
       flock.velocityTrendDistribution = float(this.chunkIndex) / 1000.0;  //*******  NB val / 1000.0
     } else if (this.action.equals("homeForceRadius")) {
-      homeForceRadius = float(this.value);
+      for (HomeForce homeForce: this.homeForcesForIndex(this.chunkIndex)) {
+        homeForce.radius = float(this.value);
+      } 
     } else if (this.action.equals("separationForce")) {
       separationForce = float(this.value) / 1000.0; //*******  NB val / 1000.0
     } else if (this.action.equals("cohesionForce")) {
       cohesionForce = float(this.value) / 1000.0; //*******  NB val / 1000.0
     } else if (this.action.equals("alignmentForce")) {
       alignmentForce = float(this.value) / 1000.0; //*******  NB val / 1000.0
+    } else if (this.action.equals("assignHomeForceIndexWithProbability")) {
+      flock.assignHomeForceIndexWithProbability(float(this.value) / 1000.0, float(this.value2) / 1000.0); //*******  NB val / 1000.0
+    } else if (this.action.equals("assignHomeForceIndexWithLocation")) {
+      flock.assignHomeForceIndexWithLocation(ths.chunkIndex, this.value, this.value2); 
     }
+  }
+  
+  ArrayList<HomeForce> homeForcesForIndex(int index) {    
+    if (this.chunkIndex == -1) {
+        //apply to all homeForces
+        return homeForces;
+      } else {
+        ArrayList<HomeForce> list = new ArrayList<HomeForce>();
+        list.add(homeForces.get(index));
+        return list;
+      }      
   }
 }

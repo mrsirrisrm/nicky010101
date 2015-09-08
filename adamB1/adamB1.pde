@@ -12,10 +12,7 @@ float alignmentForce = 2.0;
 float cohesionForce = 2.0;
 float antiGridForce = 5.0;
 float antiGridForce2 = 1.0;
-float homeForce = 0.0;
-float homeForceX = 0.0;
-float homeForceY = 0.0;
-float homeForceRadius = 1.0;
+ArrayList<HomeForce> homeForces = new ArrayList<HomeForce>();
 float gridSpeedModifier = 0.0;
 final float initialTransitionSpeedModifier = 0.002;
 float transitionSpeedModifier = initialTransitionSpeedModifier;
@@ -43,7 +40,7 @@ final float targetVideoFrameRate = 25.0;
 boolean shutdownCalled = false;
 
 String positionsFile = "/Users/martin/Movies/processingPositionsAdam/outputPositionsB1.dat";
-int inputPositionsMode = 2; //0 : nothing  1 : write positions to file  2 : read positions from file
+int inputPositionsMode = 0; //0 : nothing  1 : write positions to file  2 : read positions from file
 int inputPositionsStartFromFrame = 940;  //   <--------------------------------*************
 boolean fullDraw = true;
 boolean useMiniFlocks = true;
@@ -77,6 +74,11 @@ void setup () {
   imageMode(CENTER); 
   fill(255);
   
+  //add more homeForces than we will need
+  while (homeForces.size() < 32) {
+    homeForces.add(new HomeForce());
+  }
+  
   sequence = new Sequence(dataPath("sequence.txt"));
     
   //load the stamp images  
@@ -92,8 +94,9 @@ void setup () {
   
   inputData = new InputData();
      
-  int COUNT = 19942; 
-  //int COUNT = 9912;  
+  //int COUNT = 19942; 
+  //int COUNT = 9912;
+  int COUNT = 3000;  
   flock = new Flock( COUNT , inputPositionsMode, inputPositionsStartFromFrame);
   
   if (inputPositionsMode != 2) {
