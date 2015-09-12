@@ -67,8 +67,10 @@ class InputData {
         break;        
       default : break; //<>//
     }
-    //20150211: extend the videos to 3x the length
-    lastVideoFrame += 2 * (lastVideoFrame - firstVideoFrame);
+    if (inputData.closeupInd != 0) {
+      //20150211: extend the videos to 3x the length
+      lastVideoFrame += 2 * (lastVideoFrame - firstVideoFrame);
+    }
     
     smoothedCameraDist = cameraDist;
     smoothedSmoothedCameraDist = cameraDist;

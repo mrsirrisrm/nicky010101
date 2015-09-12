@@ -63,9 +63,9 @@ Random randForInts = new Random();
 void setup () {
   randomSeed(0);
   noiseSeed(0);  
-  size(1920, 1080, P3D);
+  //size(1920, 1080, P3D);
   //size(round(0.66*1920), round(0.66*1080), P3D);
-  //size(round(0.5*1920), round(0.5*1080), P3D); 
+  size(round(0.5*1920), round(0.5*1080), P3D); 
   if (frame != null) {
     frame.setResizable(false);
   }
