@@ -30,7 +30,7 @@ Sequence sequence;// = new Sequence(sequenceFile);
 
 final String frameOutputDir = "/Users/martin/Movies/pfAdamB1h/";
 final String recordedMovesFile = "recordedMoves.txt";
-final int makeNthFrameToPNG = 1; //0 for no video
+final int makeNthFrameToPNG = 0; //0 for no video
 int firstVideoFrame = -1;
 int lastVideoFrame = 9000;
 final int videoOversample = 1;
@@ -94,9 +94,9 @@ void setup () {
   
   inputData = new InputData();
      
-  int COUNT = 19942; 
+  //int COUNT = 19942; 
   //int COUNT = 9912;
-  //int COUNT = 3000;  
+  int COUNT = 3000;  
   flock = new Flock( COUNT , inputPositionsMode, inputPositionsStartFromFrame);
   
   if (inputPositionsMode != 2) {
