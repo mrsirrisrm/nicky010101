@@ -1,4 +1,5 @@
 Flock flock;
+Weather weather = new Weather();
 
 boolean iterating = true;
 boolean flocking = true;
@@ -52,9 +53,12 @@ void setup () {
   fill(255);
   
   //add more homeForces than we will need
-  while (homeForces.size() < 32) {
+  while (homeForces.size() < 1) {
     homeForces.add(new HomeForce());
   }
+  homeForces.get(0).x = width / 2;
+  homeForces.get(0).y = height / 2;
+  homeForces.get(0).radius = width;
   
   //load the stamp images  
   String path = "../../resources/";
@@ -65,10 +69,12 @@ void setup () {
   if (img0 == null || img1 == null) {
     println("Unable to load stamp images. Check resources directory location and contents");    
   }  
-  
+   //<>//
   int COUNT = 1000;
   flock = new Flock(COUNT); 
   flock.setupRandomDistributionCenteredOn(width / 2 , round(float(height) * 0.2) , round(float(width) * 0.7 / 2.0));
+  
+  thread("updateWeather");
 }; //<>//
 
 
@@ -108,4 +114,8 @@ void draw () {
   
   fill(0);
   text("" + round(frameRate), width - 50, height - 50);
+}
+
+void updateWeather() {
+  weather.query();
 }

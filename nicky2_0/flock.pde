@@ -19,7 +19,6 @@ class Flock {
   private float[] xs, ys, dxs, dys, rotations, drotations, speedModifiers;
   private float[] drawxs, drawys, ddrawxs, ddrawys;
   private boolean[] isOnes;
-  private int[] homeForceIndices;
   
   private float[][] distances;
   private int[][] nextUpdateIn;
@@ -52,13 +51,12 @@ class Flock {
     ddrawxs = new float[numParticles];
     ddrawys = new float[numParticles];
     dxs = new float[numParticles]; //<>//
-    dys = new float[numParticles];
+    dys = new float[numParticles]; //<>//
     rotations = new float[numParticles];
     drotations = new float[numParticles];
     speedModifiers = new float[numParticles];
     
     isOnes = new boolean[numParticles];
-    homeForceIndices = new int[numParticles];   
     
     sepKeepsx = new float[numParticles];
     aliKeepsx = new float[numParticles];
@@ -192,7 +190,7 @@ class Flock {
   
   public void assignMiniFlocks() { //<>//
     miniFlocks.assignToMiniFlocks(xs.length);
-  } 
+  }  //<>//
   
   public void calcMiniFlocksForcesAndMotion() {
     sepKeepsx = new float[xs.length];
@@ -213,7 +211,7 @@ class Flock {
   public void runFlockingWithKeptForces(int n, PVector homeF, boolean printing) {
     dxs[n] += (sepKeepsx[n] * separationForce + aliKeepsx[n] * alignmentForce + cohKeepsx[n] * cohesionForce);
     dys[n] += (sepKeepsy[n] * separationForce + aliKeepsy[n] * alignmentForce + cohKeepsy[n] * cohesionForce);
-    HomeForce homeForce = homeForces.get(homeForceIndices[n]);
+    HomeForce homeForce = homeForces.get(0);
     if (homeForce.force != 0) {
       dxs[n] += homeF.x * homeForce.force;
       dys[n] += homeF.y * homeForce.force;
@@ -233,7 +231,7 @@ class Flock {
   }
   
   public PVector homeForceForParticle(int n) {
-    HomeForce homeForce = homeForces.get(homeForceIndices[n]);
+    HomeForce homeForce = homeForces.get(0);
     if (homeForce.force == 0) {
       return new PVector(0,0);
     } else {
@@ -465,29 +463,5 @@ class Flock {
       return new PVector(0, 0);
     }
   }
-        
-  public void assignHomeForceIndexWithProbability(float p1, float p2) {
-    for (int n = 0; n < homeForceIndices.length; n++) {
-      if (random(0,1) < p1 ) {
-        homeForceIndices[n] = 0;
-      } else if (random(0,1) < p2) {
-        homeForceIndices[n] = 1;
-      } else {
-        homeForceIndices[n] = 2;
-      }
-    }
-  }
-  
-  public void assignHomeForceIndexWithLocation(int radius, int x, int y) {
-    float radiusSquared = radius * radius;
-    for (int n = 0; n < homeForceIndices.length; n++) {
-      float distSquared = (x - xs[n])*(x - xs[n]) + (y - ys[n])*(y - ys[n]);
-      if (distSquared > radiusSquared) {
-        homeForceIndices[n] = 0;
-      } else {
-        homeForceIndices[n] = 1;
-      }
-    }
-  }
-  
+          
 }
