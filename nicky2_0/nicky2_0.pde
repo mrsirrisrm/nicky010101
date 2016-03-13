@@ -43,9 +43,9 @@ Random randForInts = new Random();
 void setup () {
   size(200, 200, FX2D);
   surface.setResizable(true);
-  //surface.setSize(round(0.66*1920), round(0.66*1080));
-  //surface.setSize(round(0.66*1920), round(0.66*1080));
-  surface.setSize(round(0.5*1920), round(0.5*1080));  
+  int w = round(0.5*1920);
+  int h = round(0.5*1080);
+  surface.setSize(w, h);  
   randomSeed(0);
   noiseSeed(0);  
   background(255);
@@ -56,9 +56,10 @@ void setup () {
   while (homeForces.size() < 1) {
     homeForces.add(new HomeForce());
   }
-  homeForces.get(0).x = width / 2;
-  homeForces.get(0).y = height / 2;
-  homeForces.get(0).radius = width;
+  homeForces.get(0).x = w / 2;
+  homeForces.get(0).y = h / 2;
+  homeForces.get(0).force = 2.0;
+  homeForces.get(0).radius = 100;
   
   //load the stamp images  
   String path = "../../resources/";
@@ -72,7 +73,7 @@ void setup () {
    //<>//
   int COUNT = 1000;
   flock = new Flock(COUNT); 
-  flock.setupRandomDistributionCenteredOn(width / 2 , round(float(height) * 0.2) , round(float(width) * 0.7 / 2.0));
+  flock.setupRandomDistributionCenteredOn(w / 2 , h / 2 , round(float(w) * 0.7 / 2.0));
   
   thread("updateWeather");
 }; //<>//
@@ -90,7 +91,7 @@ void draw () {
       } else {
         flock.allRunFlocking();
       }
-       
+      
       wind();
     }
     

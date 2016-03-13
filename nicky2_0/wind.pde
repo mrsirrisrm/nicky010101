@@ -9,9 +9,8 @@ class Tmp {
 static final float WindSpacingScale = 0.02;
 static final float WindTimeScale = 0.02;
 
-void wind() {
-  
-  int dir = ((frameCount / 40) % 2 == 0) ? kWest : kEast;
+void wind() {  
+  int dir = ((frameCount / 400) % 2 == 0) ? kWest : kEast;
   
   Tmp[] tmps = new Tmp[height]; //per height pixel
   for (int j = 0; j < height; j++) {
@@ -26,11 +25,9 @@ void wind() {
       int mnj = max(0, round(flock.ys[n] - size));
       int mxj = min(height, round(flock.ys[n] + size));
       for (int j = mnj; j < mxj; j++) {
-        if (tmps[j].ind == -1) {
-          if ((dir == kWest && flock.xs[n] < tmps[j].x) || (dir == kEast && flock.xs[n] > tmps[j].x)) {
-            tmps[j].ind = n;
-            tmps[j].x = flock.xs[n];
-          }
+        if ((dir == kWest && (tmps[j].ind == -1 || flock.xs[n] < tmps[j].x)) || (dir == kEast && (tmps[j].ind == -1 || flock.xs[n] > tmps[j].x))) {
+          tmps[j].ind = n;
+          tmps[j].x = flock.xs[n];
         }
       }
     }
@@ -47,12 +44,9 @@ void wind() {
   }
   
   //debug: tint
-  for (int n = 0; n < flock.tints.length; n++) {
-    flock.tints[n] = color(0);
-  }
+  flock.tints = new color[flock.tints.length];
   for (Tmp t: tmps) {
     if (t.ind == -1) {continue;}
     flock.tints[t.ind] = color(255,0,0);
   }
-
 }

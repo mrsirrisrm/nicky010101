@@ -16,13 +16,13 @@ import java.io.InputStream;
 
 class Flock { 
 
-  private float[] xs, ys, dxs, dys, rotations, drotations, speedModifiers;
-  private float[] drawxs, drawys, ddrawxs, ddrawys;
+  float[] xs, ys, dxs, dys, rotations, drotations, speedModifiers;
+  float[] drawxs, drawys, ddrawxs, ddrawys;
   private boolean[] isOnes;
   
   private float[][] distances;
   private int[][] nextUpdateIn;
-  private color[] tints; 
+  color[] tints; 
   
   private float[] sepKeepsx, sepKeepsy;
   private float[] aliKeepsx, aliKeepsy;
@@ -40,8 +40,6 @@ class Flock {
   public static final int   dontUpdateForNIterations = 10;
   public static final float imgScaleBy = 0.1; 
   private static final float maxforce = 0.2;    // Maximum steering force
-  public static final color freeTint = 0; 
-  public static final int centerChunkIndex = 27;
   
   Flock (int numParticles) {
     xs = new float[numParticles];
@@ -113,23 +111,22 @@ class Flock {
     PVector sep = separateAll(n);   // Separation
     PVector ali = alignAll(n);      // Alignment
     PVector coh = cohesionAll(n);   // Cohesion
+    PVector home = homeForceForParticle(n);
     
     // weight these forces
     sep.mult(separationForce);
     ali.mult(alignmentForce);
     coh.mult(cohesionForce);
+    //home.mult(homeForce);
              
     // Update velocity
-    dxs[n] += (sep.x + ali.x + coh.x);
-    dys[n] += (sep.y + ali.y + coh.y);
+    dxs[n] += (sep.x + ali.x + coh.x + home.x);
+    dys[n] += (sep.y + ali.y + coh.y + home.y);
     this.limitSpeed(n);
     xs[n] += dxs[n];
     ys[n] += dys[n];
     
     updateSmoothedPositions(n,motionSmoothing);
-    //if (n == 0) {
-    //  println(xs[n],drawxs[n]);
-    //}
   }
 
   public void allRotate () {
