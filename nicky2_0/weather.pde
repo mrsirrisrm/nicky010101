@@ -25,7 +25,8 @@ class Weather {
     JSONObject wind = v.getJSONObject("wind");
     windSpeed = wind.getFloat("speed");
     windDeg = wind.getFloat("deg");
-    println("wind",windSpeed,windDeg);
+    City city = cities.get(cityInd % cities.size());
+    println(city.name, "wind",windSpeed,windDeg);
   }
 }
 

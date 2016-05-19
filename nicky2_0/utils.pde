@@ -56,7 +56,7 @@ public void textDraw (float x, float y, float rotation) {
   popMatrix();
 }
 
-public void imgDraw (float x, float y, float dx, float dy, float rotation, float drotation, boolean isOne, color tint, int videoOversample, int thisSample) {
+public void imgDraw (float x, float y, float dx, float dy, float rotation, float drotation, boolean isOne, color tint, int videoOversample, int thisSample, boolean windy) {
   tint(tint);
   pushMatrix();
   if (videoOversample == 1 ) {
@@ -70,10 +70,11 @@ public void imgDraw (float x, float y, float dx, float dy, float rotation, float
     rotate(rotation - drotation * oversamplingFactor);               
   }
   
+  float scale = windy ? 2.5 : 1;
   if (isOne) {
-    image(img1, 0, 0, imgWidth(isOne) , imgHeight(isOne) );
+    image(img1, 0, 0, imgWidth(isOne)*scale , imgHeight(isOne)*scale );
   } else {
-    image(img0, 0, 0, imgWidth(isOne) , imgHeight(isOne) );
+    image(img0, 0, 0, imgWidth(isOne)*scale , imgHeight(isOne)*scale );
   }
   
   popMatrix();

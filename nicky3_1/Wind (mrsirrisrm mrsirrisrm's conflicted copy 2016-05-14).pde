@@ -9,7 +9,7 @@ class Tmp {
 static final float WindSpacingScale = 0.02;
 static final float WindTimeScale = 0.05;
 
-void wind() {  
+void wind(FWorld world) {  
   int dir = ((frameCount / 400) % 2 == 0) ? kWest : kEast;
   
   Tmp[] tmps = new Tmp[height]; //per height pixel
@@ -19,21 +19,25 @@ void wind() {
   
   float size = 5;
   
+  List<FBody> bodies = world.getBodies();
   if (dir == kWest || dir == kEast) {
     //find left or rightmost particle for each row
-    for (int n = 0; n < flock.ys.length; n++) {
-      int mnj = max(0, round(flock.ys[n] - size));
-      int mxj = min(height, round(flock.ys[n] + size));
+    for (int n = 0; n < bodies.size(); n++) {
+      int mnj = max(0, round(bodies.get(n).getY() - size));
+      int mxj = min(height, round(bodies.get(n).getY() + size));
       for (int j = mnj; j < mxj; j++) {
-        if ((dir == kWest && (tmps[j].ind == -1 || flock.xs[n] < tmps[j].x)) || (dir == kEast && (tmps[j].ind == -1 || flock.xs[n] > tmps[j].x))) {
+        if ((dir == kWest && 
+          (tmps[j].ind == -1 || bodies.get(n).getX() < tmps[j].x)) || 
+          (dir == kEast && 
+          (tmps[j].ind == -1 || bodies.get(n).getX() > tmps[j].x))) {
           tmps[j].ind = n;
-          tmps[j].x = flock.xs[n];
+          tmps[j].x = bodies.get(n).getX();
         }
       }
     }
   } 
   
-  float windStrengthX = dir == kWest ? 1 : -1;
+  float windStrengthX = dir == kWest ? 0.8 : -0.8;
   float windStrengthY = 0;
   for (int i = 0; i < tmps.length; i++) {
     if (tmps[i].ind == -1) {continue;}
@@ -43,18 +47,8 @@ void wind() {
     float wsX = cos(q) * windStrengthX + sin(q) * windStrengthY;
     float wsY = sin(q) * windStrengthX + cos(q) * windStrengthY;
     
-    flock.dxs[tmps[i].ind] += wsX * noise(i*WindSpacingScale,frameCount*WindTimeScale+10); 
-    flock.dys[tmps[i].ind] += wsY * noise(i*WindSpacingScale,frameCount*WindTimeScale+10); 
-  }
-  
-  //debug: tint
-  flock.windy = new boolean[flock.xs.length];
-  
-  //flock.tints = new color[flock.tints.length];
-  for (Tmp t: tmps) {
-    if (t.ind == -1) {continue;}
-    //flock.tints[t.ind] = color(255,0,0);
-
-    flock.windy[t.ind] = true;
+    FBody body = bodies.get(tmps[i].ind); 
+    body.addImpulse(wsX * noise(i*WindSpacingScale,frameCount*WindTimeScale+10),
+      wsY * noise(i*WindSpacingScale,frameCount*WindTimeScale+10)); 
   }  
 }

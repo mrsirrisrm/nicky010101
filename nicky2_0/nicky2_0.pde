@@ -90,9 +90,7 @@ void draw () {
         flock.calcMiniFlocksForcesAndMotion();
       } else {
         flock.allRunFlocking();
-      }
-      
-      wind();
+      }      
     }
     
     if (iterating) {
@@ -115,8 +113,13 @@ void draw () {
   
   fill(0);
   text("" + round(frameRate), width - 50, height - 50);
+  
+  if (frameCount % 20 == 0) {
+    //thread("updateWeather");
+  }
 }
 
 void updateWeather() {
   weather.query();
+  weather.cityInd++;
 }

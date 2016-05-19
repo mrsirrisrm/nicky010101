@@ -19,6 +19,7 @@ class Flock {
   float[] xs, ys, dxs, dys, rotations, drotations, speedModifiers;
   float[] drawxs, drawys, ddrawxs, ddrawys;
   private boolean[] isOnes;
+  boolean[] windy;
   
   private float[][] distances;
   private int[][] nextUpdateIn;
@@ -53,6 +54,7 @@ class Flock {
     rotations = new float[numParticles];
     drotations = new float[numParticles];
     speedModifiers = new float[numParticles];
+    windy = new boolean[numParticles];
     
     isOnes = new boolean[numParticles];
     
@@ -95,7 +97,7 @@ class Flock {
       if (!fullDraw) {
         dotDraw(drawxs[n],drawys[n]);
       } else {
-        imgDraw(drawxs[n],drawys[n],ddrawxs[n],ddrawys[n],rotations[n],drotations[n],isOnes[n],tints[n],videoOversample,thisOversample);
+        imgDraw(drawxs[n],drawys[n],ddrawxs[n],ddrawys[n],rotations[n],drotations[n],isOnes[n],tints[n],videoOversample,thisOversample,windy[n]);
       } 
     }
   }
@@ -104,6 +106,10 @@ class Flock {
     calcAllDistances();
     for (int n = 0; n < xs.length; n++ ) {      
       runFlocking(n);
+    }
+    wind();
+    for (int n = 0; n < xs.length; n++ ) {
+      updateSmoothedPositions(n,motionSmoothing);
     }
   }
   
@@ -125,8 +131,6 @@ class Flock {
     this.limitSpeed(n);
     xs[n] += dxs[n];
     ys[n] += dys[n];
-    
-    updateSmoothedPositions(n,motionSmoothing);
   }
 
   public void allRotate () {
