@@ -1,6 +1,8 @@
 import fisica.*;
 import peasy.PeasyCam;
 import java.util.List;
+import processing.video.*;
+//Movie movie;
 
 static final int worldCount = 3;
 
@@ -15,6 +17,9 @@ void setup(){
   smooth();
   randomSeed(0);
   //hint(DISABLE_DEPTH_TEST);
+  
+  //movie = new Movie(this, "/Users/martin/Movies/gravityWaves3D1.mov");
+  //movie.play();
 
   cam = new PeasyCam(this, 400);
   Fisica.init(this);
@@ -33,6 +38,7 @@ void setup(){
 
 void draw() {
   background(255);
+  //image(movie, 0, 0);
 
   for (World world: worlds) {
     if (world.getBodyCount() < 600 && random(1000) < 300) {
@@ -75,6 +81,10 @@ void draw() {
     worlds.get(i).draw(this);
     popMatrix();
   }
+}
+
+void movieEvent(Movie m) {
+  m.read();
 }
 
 void createNewBox(FWorld world) {
