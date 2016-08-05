@@ -30,7 +30,7 @@ class Text extends FBox {
     }
     
     int tint = max(0, min(255, worldInd * 60 + yTint));    
-    fill(tint);
+    fill(0);
     stroke(0);
     textAlign(CENTER);
     text(isOne ? "1" : "0", 0, textOffset);

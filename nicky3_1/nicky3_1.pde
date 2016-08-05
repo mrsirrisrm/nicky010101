@@ -37,36 +37,8 @@ void setup(){
 }
 
 void draw() {
-  background(255);
-  //image(movie, 0, 0);
-
-  for (World world: worlds) {
-    if (world.getBodyCount() < 600 && random(1000) < 300) {
-      createNewBox(world);
-    }    
-    List<Attractor> attractorList = null;
-    if (worlds.indexOf(world) < attractors.size()) {
-      attractorList = attractors.get(worlds.indexOf(world));
-    }
-    
-    wind(world);
-    world.step();
-    
-    List<FBody> bodies = world.getBodies();
-    for (FBody body: bodies) {
-      if (attractorList != null) {
-        for (Attractor att: attractorList) {
-          att.applyToBody(body);
-        }
-      }
-      
-      if (body instanceof Text && frameCount > 200 && random(10000) < 5) {
-        world.removeBody(body);
-      }
-    }
-    
-    world.updateTintScaleY();
-  }
+  background(0,255,0);
+  //image(movie, 0, 0);  
   
   if (frameCount % 10 == 0) {
     //for (int i = 0; i < worlds.get(0).tintScaleY.length; i++) {
@@ -78,8 +50,19 @@ void draw() {
   for (int i = worlds.size() - 1; i >= 0; i--) {
     pushMatrix();
     translate(-300,-200,-i * 100.);
-    worlds.get(i).draw(this);
+    if (!worlds.get(i).threadActive) {
+      worlds.get(i).draw(this);    
+    }
     popMatrix();
+  }
+  
+  for (World world: worlds) {
+    //worldStep(world);
+    switch (worlds.indexOf(world)) {
+     case 0: thread("worldStep0");
+     case 1: thread("worldStep1");
+     case 2: thread("worldStep2");
+    }
   }
 }
 
@@ -106,4 +89,53 @@ void contactStarted(FContact c) {
   //  wind.removeFromWorld();
   //  wind = null;
   //}
+}
+
+void worldStep(World world) {
+  if (!world.threadActive) {
+    world.threadActive = true;
+    
+    if (world.getBodyCount() < 600 && random(1000) < 300) {
+      createNewBox(world);
+    }    
+    List<Attractor> attractorList = null;
+    if (worlds.indexOf(world) < attractors.size()) {
+      attractorList = attractors.get(worlds.indexOf(world));
+    }
+    
+    wind(world);
+    
+    
+    world.step();
+    
+    List<FBody> bodies = world.getBodies();
+    for (FBody body: bodies) {
+      if (attractorList != null) {
+        for (Attractor att: attractorList) {
+          att.applyToBody(body);
+        }
+      }
+      
+      if (body instanceof Text && frameCount > 200 && random(10000) < 5) {
+        world.removeBody(body);
+      }
+    }
+    
+    world.updateTintScaleY();
+    
+    
+    
+    world.threadActive = false;
+  }
+}
+void worldStep0() {
+  worldStep(worlds.get(0));  
+}
+
+void worldStep1() {
+  worldStep(worlds.get(1));
+}
+
+void worldStep2() {
+  worldStep(worlds.get(2));
 }

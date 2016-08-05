@@ -1,5 +1,6 @@
 class World extends FWorld {
   
+  boolean threadActive = false;
   int av = 16;
   static final float tintScaleDecay = 0.95;
   float[] tintScaleY, newTintScaleY;
