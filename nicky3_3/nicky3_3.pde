@@ -3,7 +3,14 @@ import org.jaudiolibs.beads.*;
 import java.util.Arrays; 
 import java.util.List;
 
+//input and output files
+final String outputFile = "/Users/martin/audio/nicky_out.wav";
+final String dir = "/Users/martin/Desktop/nickySamples/";
+String[] files = {"Obama.mp3","Trump.mp3","Sadiq Khan.mp3"};
+
 AudioContext ac;
+RecordToSample recordToSample;
+final Sample outputSample = new Sample(5000D);
 
 float[][] buffers;
 
@@ -18,8 +25,7 @@ void setup() {
 
   randomSeed(0);
   noiseSeed(0);
-  String dir = "/Users/martin/Desktop/nickySamples/";
-  String[] files = {"Obama.mp3","Trump.mp3","Sadiq Khan.mp3"};
+    
   buffers = new float[files.length][0];
   for (int j = 0; j < files.length; j++) {
     buffers[j] = setupSampleBuffer(SampleManager.sample(dir + files[j]));
@@ -33,6 +39,11 @@ void setup() {
   }
   
   ac.out.addInput(g);
+  recordToSample = new RecordToSample(ac,
+        outputSample, RecordToSample.Mode.INFINITE);
+  recordToSample.addInput(ac.out);
+  ac.out.addDependent(recordToSample);
+  
   ac.start();  
 }
 
@@ -96,4 +107,19 @@ class Babble extends UGen {
     }
   }    
   
+}
+
+void keyPressed() {
+  if (key == 's') {
+    recordToSample.clip();
+    Sample sample = recordToSample.getSample();
+    try {
+      sample.write(outputFile, AudioFileType.WAV);
+    } catch (IOException e) {
+      System.out.println("Couldn't save audio:");
+      e.printStackTrace();
+    }
+
+    ac.stop();
+  }
 }
