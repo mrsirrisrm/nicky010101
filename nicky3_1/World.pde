@@ -1,11 +1,11 @@
 class World extends FWorld {
   
   int maxBodyCount;
-  static final int addBodyProbability = 3000, 
+  static final int addBodyProbability = 30000, //3000, 
     removeBodiesAfterFrame = 400,
     removeBodyProbability = 3;
     
-  static final float gravityX = 50, gravityY = 500,
+  static final float gravityX = 20, gravityY = 500, gravityY0 = 40,
     attractorStrength = 2500;
   final float[] attractorYs = {0.7,0.85,1.0};
   
@@ -13,29 +13,27 @@ class World extends FWorld {
   List<Attractor> attractors = new ArrayList<Attractor>();
   Wind wind = new Wind();
 
-  World(PApplet applet,  float attractorX, int bodyCount) {
+  World(int w, int h,  float attractorX, int bodyCount) {
     super();
     
     this.maxBodyCount = bodyCount;
-    this.setEdges(applet, color(0,0,0,0));
+    this.setEdges(0,0,w,h, color(0,0,0,0));
     this.remove(this.top);
     this.setGravity(0, gravityY);
 
     for (float attractorY: attractorYs) {
-      attractors.add(new Attractor(attractorX, height * attractorY, attractorStrength));
+      attractors.add(new Attractor(attractorX, h0 * attractorY, attractorStrength));
     }
   }
   
   void wind(int index) {
-    if (frameCount > 2) { //don't call noise funcs before Applet is created
-      wind.wind(this, index);
-    }
+    wind.wind(this, index);
   }
   
   void step(int index) {
     
     this.setGravity(gravityX * sin(0.03 * frameCount), 
-      gravityY * (((frameCount % 50) - 3.f) / 50.f));
+      gravityY0 + gravityY * (((frameCount % 70)) / 70.f));
     
     
     if (this.getBodyCount() < maxBodyCount && random(10000) < addBodyProbability) {

@@ -4,9 +4,11 @@ class Text extends FBox {
   float textOffset;
   int created = frameCount;
 
-  Text(boolean _isOne) {    
-    super(_isOne ? 5 : 10, textAscent() + textDescent());
-    isOne = _isOne;    
+  //static final float scale = 3.f;
+
+  Text(boolean isOne) {       
+    super((isOne ? 5 : 10), (textAscent() + textDescent()));
+    this.isOne = isOne;    
     textOffset = textAscent() - getHeight()/2;
   }
   
