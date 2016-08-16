@@ -114,8 +114,8 @@ void draw () {
   fill(0);
   text("" + round(frameRate), width - 50, height - 50);
   
-  if (frameCount % 20 == 0) {
-    //thread("updateWeather");
+  if (frameCount % 200 == 0) {
+    thread("updateWeather");
   }
 }
 

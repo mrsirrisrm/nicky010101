@@ -6,18 +6,22 @@ import processing.video.*;
 
 static final boolean threaded = true;
 static final int worldCount = 3;
+final float[] attractorXs = {500.f, 50.f, 400.f};
+final color background = color(0,255,0);
+
+final int[] bodyCounts = {700,900,500};
+final float[] xx = {0, -100, 0};
+final float[] yy = {50, 50, -30};
+final float[] zz = {80, -30, -150};
 
 PeasyCam cam;
 List<World> worlds = new ArrayList<World>();
-//List<List<Attractor>> attractors = new ArrayList<List<Attractor>>();
-
-float[] attractorXs = {500.f, 50.f, 400.f};
 
 void setup(){
   size(600, 400, P3D);
   //fullScreen(P3D);
   smooth();
-  randomSeed(0);
+  //randomSeed(0);
   //hint(DISABLE_DEPTH_TEST);
   
   //movie = new Movie(this, "/Users/martin/Movies/gravityWaves3D1.mov");
@@ -26,8 +30,10 @@ void setup(){
   cam = new PeasyCam(this, 400);
   Fisica.init(this);
 
-  while (worlds.size() < 3) {
-    World world = new World(this, attractorXs[worlds.size()]);
+  while (worlds.size() < worldCount) {
+    World world = new World(this, 
+      attractorXs[worlds.size()],
+      bodyCounts[worlds.size()]);
     worlds.add(world);    
   }
   
@@ -35,21 +41,28 @@ void setup(){
     //noLoop();
     //doCalcs();
   }
+  
+  //frameRate(20);
 }
 
-void draw() {
-  //print("d");
-  background(0,255,0);
+void draw() {  
+  background(background);
   //image(movie, 0, 0);  
   
   for (int i = worlds.size() - 1; i >= 0; i--) {
     pushMatrix();
-    translate(-300,-200,-i * 100.);
+    translate(-width/2 + xx[i], -height/2 + yy[i], zz[i]);
     if (!worlds.get(i).threadActive) {
       worlds.get(i).draw(this);    
     }
     popMatrix();
   }
+  
+  fill(0);
+  stroke(0);
+  //rect(-width/2,-height/2,20,height);
+  //rect(width / 2 - 20,-height/2,20,height);
+
   
   doCalcs();
   
@@ -60,7 +73,7 @@ void draw() {
      } catch(Exception e) {
      }
    }  
-  }  
+  }     
 }
 
 void doCalcs() {  
@@ -72,7 +85,7 @@ void doCalcs() {
     if (threaded) {       
       thread("worldStep" + i);
     } else {
-      worldStep(worlds.get(i), i);
+      worlds.get(i).step(i);
     }
   }
 }
@@ -101,46 +114,14 @@ void createNewBox(FWorld world, int index) {
   world.add(t);
 }
 
-void worldStep(World world, int index) {
-  if (world.getBodyCount() < 600 && random(1000) < 300) {
-    createNewBox(world, index);
-  }    
-  
-  world.wind(index);
-  
-  try {
-    world.step();
-  } catch(Exception e) {
-  }
-  
-  for (FBody body: (List<FBody>)world.getBodies()) {
-    if (!(body instanceof Text)) continue;
-    
-    if (frameCount > 200 && random(10000) < 5) {
-      world.removeBody(body);
-      continue;
-    }
-
-    for (Attractor att: world.attractors) {
-      att.applyToBody(body);
-    }    
-  }
-  
-  world.threadActive = false;
-  
-  if (threaded && allThreadsFinished()) {     
-    //redraw();
-  }
-}
-
 void worldStep0() {
-  worldStep(worlds.get(0), 0);  
+  worlds.get(0).step(0);  
 }
 
 void worldStep1() {
-  worldStep(worlds.get(1), 1);
+  worlds.get(1).step(1);
 }
 
 void worldStep2() {
-  worldStep(worlds.get(2), 2);
+  worlds.get(2).step(2);
 }

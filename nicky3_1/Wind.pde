@@ -1,5 +1,6 @@
 static final int kWest = 0;
 static final int kEast = 1;
+float windStrength = 1;
 
 class Tmp {
   int ind = -1;
@@ -50,7 +51,7 @@ class Wind {
       }
     } 
     
-    float windStrengthX = (-0.55 + noise(frameCount*0.002, 100*index + (frameCount * 0.002)))*0.4;
+    float windStrengthX = (-0.55 + noise(frameCount*0.002, 100*index + (frameCount * 0.002)))*windStrength;
     for (int i = 0; i < tmps.length; i++) {
       if (tmps[i].ind == -1) {continue;}
       
