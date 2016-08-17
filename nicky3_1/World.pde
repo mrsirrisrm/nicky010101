@@ -43,7 +43,7 @@ class World extends FWorld {
     this.wind(index);
     
     try {
-      this.step();
+      this.step(slow ? 1./60./5. : 1./60.);
     } catch(Exception e) {
     }
     

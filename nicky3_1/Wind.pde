@@ -1,6 +1,6 @@
 static final int kWest = 0;
 static final int kEast = 1;
-float windStrength = 1;
+float windStrength = 4;
 
 class Tmp {
   int ind = -1;
