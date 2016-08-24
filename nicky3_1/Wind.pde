@@ -1,6 +1,6 @@
 static final int kWest = 0;
 static final int kEast = 1;
-float windStrength = 4;
+//float windStrength = 4;
 
 class Tmp {
   int ind = -1;
@@ -17,10 +17,13 @@ class Wind {
   static final float WindSpacingScale = 0.02,
     WindTimeScale = 0.05,
     searchSize = 5;
+  int windH0;
     
-  Tmp[] tmps = new Tmp[h0]; //per height pixel
+  Tmp[] tmps; //per height pixel
 
-  Wind() {
+  Wind(int h0) {
+    windH0 = h0;
+    tmps = new Tmp[h0];
     for (int j = 0; j < h0; j++) {
       tmps[j] = new Tmp();
     }
@@ -29,7 +32,7 @@ class Wind {
   void wind(FWorld world, int index) {  
     int dir = ((frameCount / 400) % 2 == 0) ? kWest : kEast; //alternating directions
     
-    for (int j = 0; j < h0; j++) {
+    for (int j = 0; j < windH0; j++) {
       tmps[j].clear();
     }
 
@@ -38,7 +41,7 @@ class Wind {
       //find left or rightmost particle for each row
       for (int n = 0; n < bodies.size(); n++) {
         int mnj = max(0, round(bodies.get(n).getY() - searchSize));
-        int mxj = min(h0, round(bodies.get(n).getY() + searchSize));
+        int mxj = min(windH0, round(bodies.get(n).getY() + searchSize));
         for (int j = mnj; j < mxj; j++) {
           if ((dir == kWest && 
             (tmps[j].ind == -1 || bodies.get(n).getX() < tmps[j].x)) || 
@@ -52,7 +55,7 @@ class Wind {
     } 
     
     try {
-      float windStrengthX = (-0.55 + noise(frameCount*0.002, 100*index + (frameCount * 0.002)))*windStrength;
+      float windStrengthX = (-0.55 + noise(frameCount*0.002, 100*index + (frameCount * 0.002)))*scheme.windStrength;
       //float windStrengthX = random(-1.0,1.0)*windStrength; 
       for (int i = 0; i < tmps.length; i++) {
         if (tmps[i].ind == -1) {continue;}

@@ -5,24 +5,28 @@ class World extends FWorld {
     removeBodiesAfterFrame = 400,
     removeBodyProbability = 3;
     
-  static final float gravityX = 20, gravityY = 500, gravityY0 = 40,
-    attractorStrength = 2500;
+  static final float gravityX = 20;//, gravityY = 550, gravityY0 = 50,
+    //attractorStrength = 2500,
+    //gravityModSpeed = 55.;
   final float[] attractorYs = {0.7,0.85,1.0};
   
   boolean threadActive = false;
   List<Attractor> attractors = new ArrayList<Attractor>();
-  Wind wind = new Wind();
+  Wind wind;
+  boolean visible;
 
-  World(int w, int h,  float attractorX, int bodyCount) {
+  World(int w, int h,  float attractorX, int bodyCount, boolean visible) {
     super();
     
+    this.visible = visible;
+    this.wind = new Wind(h);
     this.maxBodyCount = bodyCount;
     this.setEdges(0,0,w,h, color(0,0,0,0));
     this.remove(this.top);
-    this.setGravity(0, gravityY);
+    this.setGravity(0, 0);
 
     for (float attractorY: attractorYs) {
-      attractors.add(new Attractor(attractorX, h0 * attractorY, attractorStrength));
+      attractors.add(new Attractor(attractorX, h * attractorY, 0));
     }
   }
   
@@ -33,7 +37,7 @@ class World extends FWorld {
   void step(int index) {
     
     this.setGravity(gravityX * sin(0.03 * frameCount), 
-      gravityY0 + gravityY * (((frameCount % 70)) / 70.f));
+      scheme.gY0 + scheme.gY * (((frameCount % scheme.gModSpeed)) / scheme.gModSpeed));
     
     
     if (this.getBodyCount() < maxBodyCount && random(10000) < addBodyProbability) {
@@ -43,7 +47,7 @@ class World extends FWorld {
     this.wind(index);
     
     try {
-      this.step(slow ? 1./60./5. : 1./60.);
+      this.step(slow ? 1./60./2.7 : 1./60.);
     } catch(Exception e) {
     }
     

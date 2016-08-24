@@ -1,26 +1,35 @@
 import fisica.*;
 import peasy.PeasyCam;
 import java.util.List;
-import processing.video.*;
+//import processing.video.*;
+import ddf.minim.*;
+//import ddf.minim.effects.*;
 //Movie movie;
 
 boolean slow = false;
+static final String soundFile = "160814_digitarch.mp3";
 static final boolean threaded = true;
 static final int worldCount = 3;
 final float[] attractorXs = {10.f/12.f, 1.f/12.f, 8.f/12.f};
 final color background = color(0, 255, 0), 
   background2 = color(0, 255, 0, 40);
-final int w0 = 800, h0 = 400;
+final int[] w0 = {900, 1050, 1200}, h0 = {400, 400, 400};
+final boolean[] visibles = {true, true, true};
 
 final int[] bodyCounts = {700, 800, 500};
 final float[] xx = //{0, -100.f / w0, 0};
-  {170.f / w0, 165.f / w0, 200.f / w0};
+  {240.f / w0[0], 200.f / w0[0], 180.f / w0[0]};
 final float[] yy = //{0.f/h0, 0.f/h0, -30.f/h0};//
-  { 140.f / h0, 130.f / h0, 120.f / h0 };
+  {140.f / h0[0], 130.f / h0[0], 120.f / h0[0]};
 final float[] zz = //{80, -30, -150};
-  {-0, -40, -120}; 
+  {-0, -40, -120};
+  
+List<Scheme> schemes = new ArrayList<Scheme>();
+Scheme scheme;
+ 
 
-
+Minim minim;
+AudioPlayer audioPlayer;
 
 PeasyCam cam;
 List<World> worlds = new ArrayList<World>();
@@ -35,13 +44,20 @@ void setup() {
   //movie = new Movie(this, "/Users/martin/Movies/gravityWaves3D1.mov");
   //movie.play();
 
+  schemes.add(new Scheme(4,-200,550,55,2500,120,"3 heaps"));
+  schemes.add(new Scheme(4,  50,550,55,2500, 60,"flat landscape"));
+  scheme = schemes.get(0);
+  scheme.activate();
+
   cam = new PeasyCam(this, 400);
   Fisica.init(this);
 
   while (worlds.size() < worldCount) {
-    World world = new World(w0, h0, 
-      attractorXs[worlds.size()] * w0, 
-      bodyCounts[worlds.size()]);
+    int index = worlds.size();
+    World world = new World(w0[index], h0[index], 
+      attractorXs[index] * w0[index], 
+      bodyCounts[index],
+      visibles[index]);
     worlds.add(world);    
   }
 
@@ -49,30 +65,46 @@ void setup() {
     //noLoop();
     //doCalcs();
   }
+  
+  minim = new Minim(this);
+  audioPlayer = minim.loadFile(soundFile, 2048);
+  audioPlayer.loop();
 
   //frameRate(20);  
-  //println(width,height);
+  println("w", width, "h", height);
   background(background);
 }
 
-void draw() {  
-  //background(background);
+void fade() {
   noStroke();
   fill(background2);
   pushMatrix();
   translate(0,0,-130);
   rect(-width/2, -height/2, width, height);
   popMatrix();
+}
+
+void draw() {  
+  
+  //if (frameCount == 600) {
+  //  frameRate(10);
+  //}
+  
+  
+  background(background);
+  //fade();
 
   //image(movie, 0, 0);  
 
   for (int i = worlds.size() - 1; i >= 0; i--) {
-    pushMatrix();
-    translate(-width/2 + xx[i] * width, -height/2 + yy[i] * height, zz[i]);
-    if (!worlds.get(i).threadActive) {
-      worlds.get(i).draw(this);
+    if (worlds.get(i).visible) {
+      pushMatrix();
+      translate(-width/2 + xx[i] * width, -height/2 + yy[i] * height, zz[i]);
+      if (!worlds.get(i).threadActive) {
+        worlds.get(i).draw(this);
+      }
+      popMatrix();
     }
-    popMatrix();
   }
 
   fill(0);
@@ -91,6 +123,13 @@ void draw() {
       catch(Exception e) {
       }
     }
+  }
+  
+  if (scheme.shouldChange()) {
+    int index = schemes.indexOf(scheme);
+    index++;
+    scheme = schemes.get(index % schemes.size());
+    scheme.activate();
   }
 }
 
@@ -118,19 +157,22 @@ boolean allThreadsFinished() {
   return true;
 }
 
-void movieEvent(Movie m) {
-  m.read();
-}
+//void movieEvent(Movie m) {
+//  m.read();
+//}
 
 void createNewBox(FWorld world, int index) {
   try {
     Text t = new Text(random(1000) < 500);
-    t.setPosition(w0/2 + -200 + 400*noise(frameCount * 0.03, index), 
-      -h0);
+    t.setPosition(w0[index]/2 + -200 + 400*noise(frameCount * 0.03, index), 
+      -h0[index]);
     t.setRotation(random(-1, 1));
     t.setFill(255);
     t.setNoStroke();
     t.setRestitution(0.56);
+    //density default = 1.0
+    //t.setDensity(5.0);
+    //t.setFriction(0.5);
     world.add(t);
   } 
   catch(Exception e) {
