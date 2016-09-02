@@ -29,8 +29,8 @@ class Wind {
     }
   }
   
-  void wind(FWorld world, int index) {  
-    int dir = ((frameCount / 400) % 2 == 0) ? kWest : kEast; //alternating directions
+  void wind(FWorld world, long iteration, int index) {  
+    int dir = ((iteration / 400) % 2 == 0) ? kWest : kEast; //alternating directions
     
     for (int j = 0; j < windH0; j++) {
       tmps[j].clear();
@@ -55,19 +55,19 @@ class Wind {
     } 
     
     try {
-      float windStrengthX = (-0.55 + noise(frameCount*0.002, 100*index + (frameCount * 0.002)))*scheme.windStrength;
+      float windStrengthX = (-0.55 + noise(iteration*0.002, 100*index + (iteration * 0.002)))*scheme.windStrength;
       //float windStrengthX = random(-1.0,1.0)*windStrength; 
       for (int i = 0; i < tmps.length; i++) {
         if (tmps[i].ind == -1) {continue;}
         
         //apply force to particles, and change angle somewhat to make it look a little turbulent
-        float q = (noise(i*WindSpacingScale,frameCount*WindTimeScale) - 0.5) * PI * 0.7;
+        float q = (noise(i*WindSpacingScale,iteration*WindTimeScale) - 0.5) * PI * 0.7;
         float wsX = cos(q) * windStrengthX;// + sin(q) * windStrengthY;
         float wsY = sin(q) * windStrengthX;// + cos(q) * windStrengthY;
         
         if (tmps[i].ind >= 0) {
           FBody body = bodies.get(tmps[i].ind); 
-          float n = noise(i*WindSpacingScale,frameCount*WindTimeScale+10);
+          float n = noise(i*WindSpacingScale,iteration*WindTimeScale+10);
           body.addImpulse(wsX * n, wsY * n);
         }
       }

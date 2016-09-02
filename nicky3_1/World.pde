@@ -1,5 +1,5 @@
 class World extends FWorld {
-  
+    
   int maxBodyCount;
   static final int addBodyProbability = 30000, //3000, 
     removeBodiesAfterFrame = 400,
@@ -30,31 +30,35 @@ class World extends FWorld {
     }
   }
   
-  void wind(int index) {
-    wind.wind(this, index);
+  void myWind(int index) {
+    wind.wind(this, iteration, index);
   }
   
-  void step(int index) {
+  void myStep(int index) {    
     
-    this.setGravity(gravityX * sin(0.03 * frameCount), 
-      scheme.gY0 + scheme.gY * (((frameCount % scheme.gModSpeed)) / scheme.gModSpeed));
-    
-    
-    if (this.getBodyCount() < maxBodyCount && random(10000) < addBodyProbability) {
-      createNewBox(this, index);
+    this.setGravity(gravityX * sin(0.03 * iteration), 
+      scheme.gY0 + scheme.gY * (((iteration % scheme.gModSpeed)) / scheme.gModSpeed));
+        
+    if (this.getBodyCount() == 0 || (this.getBodyCount() < maxBodyCount && random(10000) < addBodyProbability)) {
+      this.createNewBox(iteration, index);
     }    
     
-    this.wind(index);
+    if (iteration > 20) {
+      this.myWind(index);
+    }
     
     try {
       this.step(slow ? 1./60./2.7 : 1./60.);
+    } catch(AssertionError e) {
+      println(e);
     } catch(Exception e) {
+      println(e);
     }
     
     for (FBody body: (List<FBody>)this.getBodies()) {
       if (!(body instanceof Text)) continue;
       
-      if (frameCount > removeBodiesAfterFrame && random(10000) < removeBodyProbability) {
+      if (!isWarmup && iteration > removeBodiesAfterFrame && random(10000) < removeBodyProbability) {
         this.removeBody(body);
         continue;
       }
@@ -70,5 +74,24 @@ class World extends FWorld {
       //redraw();
     }
   }
+  
+  private void createNewBox(long iteration, int index) {
+    try {
+      Text t = new Text(random(1000) < 500, iteration);
+      t.setPosition(w0[index]/2 + -200 + 400*noise(iteration * 0.03, index), 
+        -h0[index]);
+      t.setRotation(random(-1, 1));
+      t.setFill(255);
+      t.setNoStroke();
+      t.setRestitution(0.56);
+      //density default = 1.0
+      //t.setDensity(5.0);
+      //t.setFriction(0.5);
+      this.add(t);
+    } catch(Exception e) {
+      println(e);
+    }
+  }
+
     
 }

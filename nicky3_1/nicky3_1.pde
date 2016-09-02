@@ -6,10 +6,11 @@ import ddf.minim.*;
 //import ddf.minim.effects.*;
 //Movie movie;
 
-boolean slow = false;
+long iteration = 0;
+boolean slow = true, threaded = false, isWarmup = true;
+static final boolean runMainThreaded = true;
 static final String soundFile = "160814_digitarch.mp3";
-static final boolean threaded = true;
-static final int worldCount = 3;
+static final int worldCount = 3, warmupSteps = 2000;
 final float[] attractorXs = {10.f/12.f, 1.f/12.f, 8.f/12.f};
 final color background = color(0, 255, 0), 
   background2 = color(0, 255, 0, 40);
@@ -61,6 +62,8 @@ void setup() {
     worlds.add(world);    
   }
 
+  //warmup(2000);
+
   if (threaded) {
     //noLoop();
     //doCalcs();
@@ -68,11 +71,12 @@ void setup() {
   
   minim = new Minim(this);
   audioPlayer = minim.loadFile(soundFile, 2048);
+  audioPlayer.setGain(-5);
   audioPlayer.loop();
 
   //frameRate(20);  
   println("w", width, "h", height);
-  background(background);
+  //background(background);
 }
 
 void fade() {
@@ -84,12 +88,27 @@ void fade() {
   popMatrix();
 }
 
+void warmupDraw() {
+  background(80);
+  text("Initializating... " + (int)(((float)iteration / (float)warmupSteps * 100.f)) + "%",0,0);
+  
+  for (int i = 0; i < 100; i++)
+    doCalcs();
+  //print("" + ((float)iteration / (float)warmupSteps * 100.f) + "% ");    
+      
+  if (iteration >= warmupSteps) {
+    isWarmup = false;
+    threaded = runMainThreaded;
+  }
+}
+
 void draw() {  
   
-  //if (frameCount == 600) {
-  //  frameRate(10);
-  //}
-  
+  if (isWarmup) {
+    warmupDraw();        
+    return;
+  }
+ 
   
   background(background);
   //fade();
@@ -134,6 +153,8 @@ void draw() {
 }
 
 void doCalcs() {  
+  iteration++;
+  
   for (int i = 0; i < worlds.size(); i++) {
     worlds.get(i).threadActive = true;
   }
@@ -142,7 +163,7 @@ void doCalcs() {
     if (threaded) {       
       thread("worldStep" + i);
     } else {
-      worlds.get(i).step(i);
+      worlds.get(i).myStep(i);
     }
   }
 }
@@ -161,46 +182,28 @@ boolean allThreadsFinished() {
 //  m.read();
 //}
 
-void createNewBox(FWorld world, int index) {
-  try {
-    Text t = new Text(random(1000) < 500);
-    t.setPosition(w0[index]/2 + -200 + 400*noise(frameCount * 0.03, index), 
-      -h0[index]);
-    t.setRotation(random(-1, 1));
-    t.setFill(255);
-    t.setNoStroke();
-    t.setRestitution(0.56);
-    //density default = 1.0
-    //t.setDensity(5.0);
-    //t.setFriction(0.5);
-    world.add(t);
-  } 
-  catch(Exception e) {
-  }
-}
-
 void worldStep0() {
-  worlds.get(0).step(0);
+  worlds.get(0).myStep(0);
 }
 
 void worldStep1() {
-  worlds.get(1).step(1);
+  worlds.get(1).myStep(1);
 }
 
 void worldStep2() {
-  worlds.get(2).step(2);
+  worlds.get(2).myStep(2);
 }
 
 void keyPressed() {
   if (key == 'p') {
     if (isLooping()) {
-      noLoop();
+      //noLoop();
     } else {
-      loop();
+      //loop();
     }
   }
   
   if (key == 's') {
-    slow = !slow;
+    //slow = !slow;
   }
 }

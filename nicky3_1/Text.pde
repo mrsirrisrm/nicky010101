@@ -2,18 +2,19 @@ class Text extends FBox {
   
   boolean isOne;
   float textOffset;
-  int created = frameCount;
+  long created;
 
   //static final float scale = 3.f;
 
-  Text(boolean isOne) {       
+  Text(boolean isOne, long iteration) {       
     super((isOne ? 5 : 10), (textAscent() + textDescent()));
+    this.created = iteration;
     this.isOne = isOne;    
     textOffset = textAscent() - getHeight()/2;
   }
   
-  boolean isNew() {
-    return frameCount - created < 30;
+  boolean isNew(long iteration) {
+    return iteration - created < 30;
   }
   
   void draw(PGraphics applet) {
